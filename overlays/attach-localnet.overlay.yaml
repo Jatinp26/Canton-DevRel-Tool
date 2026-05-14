@@ -1,0 +1,28 @@
+# Overlay applied to every per-custom validator-<name> project.
+# Attaches the validator to the shared 'localnet' network created by the
+# localnet stack, and removes the per-project nginx host binding (UI is
+# served via localnet's nginx on :5000 with wallet.<name>.localhost).
+networks:
+  localnet:
+    external: true
+
+services:
+  participant:
+    networks:
+      - splice_validator
+      - localnet
+  validator:
+    networks:
+      - splice_validator
+      - localnet
+  wallet-web-ui:
+    networks:
+      - splice_validator
+      - localnet
+  ans-web-ui:
+    networks:
+      - splice_validator
+      - localnet
+  nginx:
+    # !reset overrides the base sequence rather than appending — Compose merge semantics.
+    ports: !reset []

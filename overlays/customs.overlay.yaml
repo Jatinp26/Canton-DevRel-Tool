@@ -1,0 +1,9 @@
+# Overlay applied to the localnet compose project.
+# Exposes nginx on :5000 to host and surfaces `~/.canton-devrel/nginx-customs/*.conf`
+# inside nginx so custom validators can be reached via wallet.<name>.localhost:5000.
+services:
+  nginx:
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:5000:5000"
+    volumes:
+      - ${CANTON_DEVREL_DIR}/nginx-customs:/etc/nginx/conf.d/customs:ro
