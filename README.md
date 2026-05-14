@@ -67,6 +67,58 @@ canton devrel reset                        # wipe everything, start clean
 
 ---
 
+## Validators
+
+The default `canton devrel start` brings up SV + `app-provider`. You can boot a subset, a superset, or add custom validators on top.
+
+### Boot-time flags
+
+```bash
+canton devrel start                                    # SV + app-provider
+canton devrel start --validators app-provider          # absolute set
+canton devrel start --only app-provider                # alias for --validators
+canton devrel start --with app-user                    # additive
+canton devrel start --without app-provider             # subtractive
+canton devrel start --with app-user --without app-provider
+```
+
+`sv` is infrastructure and is always on — passing it explicitly is an error.
+
+### Manage validators at runtime
+
+```bash
+canton devrel validator list                  # show all validators + health
+canton devrel validator info acme             # ports, wallet URL, party hint
+canton devrel validator add acme              # register + start a custom validator
+canton devrel validator add bob --port-base 7900
+canton devrel validator stop acme             # stop, keep data
+canton devrel validator start acme            # bring back with existing ledger
+canton devrel validator rm acme               # full delete (data + recipe)
+```
+
+Each custom validator joins the same local SV. Wallet UI is served via the localnet nginx on `:5000`:
+
+- `http://wallet.acme.localhost:5000`  — wallet UI
+- `http://localhost:5975`               — JSON ledger API (port_base + 75)
+- `http://localhost:5903/api/validator/readyz`  — health probe
+
+### Default validators
+
+Persist your preferred default set at `~/.canton-devrel/.env`:
+```bash
+DEFAULT_VALIDATORS=app-provider,app-user,acme
+```
+Used by `canton devrel start` when no flags are passed and no validators are currently registered as running.
+
+### Reset
+
+```bash
+canton devrel reset           # wipe ledger data, keep validator recipes
+canton devrel reset --purge   # also wipe ~/.canton-devrel (factory reset)
+```
+
+---
+
 ## First Run
 
 On `canton devrel start`, the tool:
