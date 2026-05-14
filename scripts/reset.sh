@@ -20,7 +20,9 @@ print_warning "This will DELETE ledger data for:"
 echo "  • All built-in validators (sv, app-provider, app-user)"
 echo "  • All custom validators in the registry"
 if [ "$PURGE" -eq 1 ]; then
-  print_warning "AND wipe $CANTON_DEVREL_DIR (recipes, registry, env files, nginx-customs)."
+  print_warning "AND wipe runtime state under $CANTON_DEVREL_DIR:"
+  echo "    bundle/, validators/, nginx-customs/, validators.json, .registry.lock"
+  echo "    (install files and .env are preserved)"
 fi
 echo ""
 read -rp "  Are you sure? Type 'yes' to confirm: " confirm
@@ -39,15 +41,19 @@ mapfile -t argv < <(infra_compose_argv)
 "${argv[@]}" down -v 2>/dev/null || true
 
 if [ "$PURGE" -eq 1 ]; then
-  print_step "Wiping $CANTON_DEVREL_DIR…"
-  rm -rf "$CANTON_DEVREL_DIR"
+  print_step "Wiping runtime state in ${CANTON_DEVREL_DIR}…"
+  rm -rf "$CANTON_DEVREL_DIR/bundle"
+  rm -rf "$CANTON_DEVREL_DIR/validators"
+  rm -rf "$CANTON_DEVREL_DIR/nginx-customs"
+  rm -f  "$CANTON_DEVREL_DIR/validators.json"
+  rm -f  "$CANTON_DEVREL_DIR/.registry.lock"
 fi
 
 echo ""
 print_ok "Reset complete."
 if [ "$PURGE" -eq 1 ]; then
-  echo "  State dir gone. Next 'canton devrel start' starts from scratch."
+  echo "  Runtime state wiped. Next 'canton devrel start' re-downloads the bundle and starts fresh."
 else
-  echo "  Recipes preserved. Next 'canton devrel start' brings the same shape back with fresh ledgers."
+  echo "  Registry preserved. Next 'canton devrel start' brings the same shape back with fresh ledgers."
 fi
 echo ""
