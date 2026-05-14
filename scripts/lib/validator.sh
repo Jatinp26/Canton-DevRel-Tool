@@ -142,17 +142,51 @@ validator_info() {
   fi
 }
 
-# Wait for the per-custom validator's readyz, up to 90s.
+# Wait for the per-custom validator's readyz. Default 300s; configurable via
+# CANTON_DEVREL_VALIDATOR_READY_TIMEOUT_S for slower hosts. Cold-booting a 4th
+# validator on top of a running localnet involves DB migration → participant
+# identity init → onboarding handshake against the SV — easily over 90s on
+# memory-constrained Docker Desktops.
 _wait_for_custom_ready() {
   local name="$1" port_base="$2"
   local url="http://localhost:$((port_base + 3))/api/validator/readyz"
-  local attempts=0
-  while [ "$attempts" -lt 18 ]; do  # 18 * 5s = 90s
+  local total_s="${CANTON_DEVREL_VALIDATOR_READY_TIMEOUT_S:-300}"
+  local interval_s=5
+  local max_attempts=$((total_s / interval_s))
+  local attempts=0 elapsed=0 next_progress=30
+  while [ "$attempts" -lt "$max_attempts" ]; do
     if _is_healthy "$url"; then return 0; fi
-    sleep 5
+    sleep "$interval_s"
     attempts=$((attempts + 1))
+    elapsed=$((attempts * interval_s))
+    if [ "$elapsed" -ge "$next_progress" ]; then
+      print_step "still waiting for '$name' readyz (${elapsed}s / ${total_s}s)…"
+      next_progress=$((elapsed + 30))
+    fi
   done
   return 1
+}
+
+# Dump validator + participant logs to a file the user can inspect after rollback.
+# Path is outside validators/<name>/ so it survives _undo's rm -rf.
+# Best-effort: failures (e.g. container already gone) are swallowed.
+_dump_failure_logs() {
+  local name="$1"
+  local out="$CANTON_DEVREL_DIR/last-validator-add-failure-${name}.log"
+  mkdir -p "$(dirname "$out")"
+  {
+    echo "=== $(date -u +%FT%TZ) — readyz timeout for validator-$name ==="
+    echo
+    echo "--- docker ps for project validator-$name ---"
+    docker ps -a --filter "name=validator-${name}-" --format \
+      'table {{.Names}}\t{{.Status}}\t{{.Ports}}' 2>/dev/null || true
+    echo
+    for svc in validator participant nginx postgres-splice; do
+      echo "--- docker logs --tail 200 validator-${name}-${svc}-1 ---"
+      docker logs --tail 200 "validator-${name}-${svc}-1" 2>&1 || true
+      echo
+    done
+  } >"$out" 2>/dev/null
 }
 
 # Check `docker compose ls` for a phantom project of the same name.
@@ -266,7 +300,13 @@ validator_add() {
 
   # 5. wait for readyz
   if ! _wait_for_custom_ready "$name" "$port_base"; then
-    _undo; print_error "validator '$name' did not become ready within 90s"; return 1
+    local timeout="${CANTON_DEVREL_VALIDATOR_READY_TIMEOUT_S:-300}"
+    _dump_failure_logs "$name"
+    local logfile="$CANTON_DEVREL_DIR/last-validator-add-failure-${name}.log"
+    _undo
+    print_error "validator '$name' did not become ready within ${timeout}s"
+    [ -f "$logfile" ] && print_warning "Last logs captured at: $logfile"
+    return 1
   fi
 
   # 6. reload nginx (so wallet.<name>.localhost is served)
