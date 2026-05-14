@@ -38,7 +38,10 @@ VALIDATOR_BUNDLE_DIR="$BUNDLE_DIR/splice-node/docker-compose/validator"
 
 # Repo paths (this file is at scripts/lib/common.sh).
 REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
-OVERLAYS_DIR="$REPO_DIR/overlays"
+# Export OVERLAYS_DIR so docker compose can interpolate it inside overlay YAMLs
+# (e.g. for volume source paths). Without export, child processes — including
+# docker compose — see it as unset and silently produce empty interpolations.
+export OVERLAYS_DIR="$REPO_DIR/overlays"
 
 # Runtime state dir — the registry, recipes, nginx-customs all live here.
 CANTON_DEVREL_DIR="${CANTON_DEVREL_DIR:-$HOME/.canton-devrel}"

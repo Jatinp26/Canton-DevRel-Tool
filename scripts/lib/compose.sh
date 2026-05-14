@@ -29,6 +29,8 @@ $LOCALNET_DIR/resource-constraints.yaml
 $OVERLAYS_DIR/customs.overlay.yaml
 -f
 $OVERLAYS_DIR/party-hint.overlay.yaml
+-f
+$OVERLAYS_DIR/sv-scan-url.overlay.yaml
 --profile
 sv
 EOF
