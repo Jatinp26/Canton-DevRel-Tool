@@ -41,7 +41,10 @@ EOF
 }
 
 # Print one argv element per line: full docker compose argv for the per-custom project.
-# Reads ~/.canton-devrel/validators/<name>/env for env-file injection.
+# Bundle .env is included first so it supplies defaults (NGINX_VERSION, SPLICE_DB_*, etc.)
+# that docker compose would otherwise auto-load — auto-loading is disabled as soon as any
+# --env-file is passed, so we must list it explicitly. The rendered env file is listed last
+# so its values override the bundle defaults.
 custom_compose_argv() {
   local name="$1"
   local envfile="$CANTON_DEVREL_DIR/validators/$name/env"
@@ -50,6 +53,8 @@ docker
 compose
 -p
 validator-$name
+--env-file
+$VALIDATOR_BUNDLE_DIR/.env
 --env-file
 $envfile
 -f
