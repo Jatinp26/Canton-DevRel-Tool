@@ -24,6 +24,7 @@ usage() {
     deploy <file.dar>   Upload a pre-built DAR to App Provider + App User participants
     logs [service]      Tail container logs (optionally filter to one service)
     reset               Wipe all data and stop containers — full clean slate
+    validator <verb>    Manage validators (list, add, start, stop, rm, info)
     version             Print version info
 
   EXAMPLES
@@ -93,6 +94,10 @@ case "$DEVREL_COMMAND" in
     ;;
   reset)
     exec "$CANTON_DEVREL_DIR/scripts/reset.sh"
+    ;;
+  validator)
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/validator.sh" "$@"
     ;;
   version|--version|-v)
     echo "canton devrel v${VERSION}"
