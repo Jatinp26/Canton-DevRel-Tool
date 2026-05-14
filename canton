@@ -77,13 +77,16 @@ fi
 
 case "$DEVREL_COMMAND" in
   start)
-    exec "$CANTON_DEVREL_DIR/scripts/start.sh"
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/start.sh" "$@"
     ;;
   stop)
-    exec "$CANTON_DEVREL_DIR/scripts/stop.sh"
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/stop.sh" "$@"
     ;;
   status)
-    exec "$CANTON_DEVREL_DIR/scripts/status.sh"
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/status.sh" "$@"
     ;;
   deploy)
     shift 2
@@ -94,7 +97,8 @@ case "$DEVREL_COMMAND" in
     exec "$CANTON_DEVREL_DIR/scripts/logs.sh" "${@:-}"
     ;;
   reset)
-    exec "$CANTON_DEVREL_DIR/scripts/reset.sh"
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/reset.sh" "$@"
     ;;
   validator)
     shift 2
