@@ -70,6 +70,7 @@ validator_list() {
     else
       wallet=$(_builtin_wallet_url "$name")
     fi
+    [ "$health" = "DOWN" ] && wallet="—"
     printf "  %-16s %-8s %-8s %-10s %s\n" "$name" "$type" "$running" "$health" "$wallet"
   done
 }
