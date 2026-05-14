@@ -240,3 +240,111 @@ validator_add() {
   echo "  JSON API:  http://localhost:$((port_base + 75))"
   echo "  Party:     $party_hint"
 }
+
+validator_start() {
+  local name="$1"
+  [ -z "$name" ] && { print_error "usage: validator start <name>"; return 1; }
+  if [ "$name" = "sv" ]; then
+    print_error "sv is infrastructure; controlled by \`canton devrel start\`"; return 1
+  fi
+  if ! _infra_running; then
+    print_error "infra not running; run \`canton devrel start\` first"; return 1
+  fi
+  local entry
+  if ! entry=$(registry_get "$name"); then
+    print_error "no such validator '$name'; run \`validator add $name\`"; return 1
+  fi
+  local type
+  type=$(echo "$entry" | jq -r .type)
+  if [ "$type" = "builtin" ]; then
+    print_step "Starting built-in '$name' (toggles ${name^^}_PROFILE=on; brief infra restart)…"
+    print_warning "SV will be unavailable ~10s; customs will reconnect."
+    case "$name" in
+      app-provider) export APP_PROVIDER_PROFILE=on ;;
+      app-user)     export APP_USER_PROFILE=on ;;
+    esac
+    registry_with_lock registry_upsert_validator "$name" builtin "" "" true
+    mapfile -t argv < <(infra_compose_argv)
+    "${argv[@]}" up -d
+  else
+    local port_base
+    port_base=$(echo "$entry" | jq -r .port_base)
+    print_step "Starting custom '$name'…"
+    mapfile -t argv < <(custom_compose_argv "$name")
+    "${argv[@]}" up -d
+    _wait_for_custom_ready "$name" "$port_base" || {
+      print_error "'$name' did not become ready within 90s"; return 1
+    }
+    registry_with_lock registry_set_running "$name" true
+  fi
+  print_ok "'$name' is running."
+}
+
+validator_stop() {
+  local name="$1"
+  [ -z "$name" ] && { print_error "usage: validator stop <name>"; return 1; }
+  if [ "$name" = "sv" ]; then
+    print_error "sv is infrastructure; controlled by \`canton devrel stop\`"; return 1
+  fi
+  local entry
+  if ! entry=$(registry_get "$name"); then
+    print_error "no such validator '$name'"; return 1
+  fi
+  local type
+  type=$(echo "$entry" | jq -r .type)
+  if [ "$type" = "builtin" ]; then
+    print_step "Stopping built-in '$name' (toggles ${name^^}_PROFILE=off; brief infra restart)…"
+    print_warning "SV will be unavailable ~10s; customs will reconnect."
+    case "$name" in
+      app-provider) export APP_PROVIDER_PROFILE=off ;;
+      app-user)     export APP_USER_PROFILE=off ;;
+    esac
+    registry_with_lock registry_set_running "$name" false
+    mapfile -t argv < <(infra_compose_argv)
+    "${argv[@]}" up -d
+  else
+    print_step "Stopping custom '$name' (volumes preserved)…"
+    mapfile -t argv < <(custom_compose_argv "$name")
+    "${argv[@]}" stop
+    registry_with_lock registry_set_running "$name" false
+  fi
+  print_ok "'$name' stopped."
+}
+
+validator_rm() {
+  local name="" force=0
+  while [ $# -gt 0 ]; do
+    case "$1" in
+      --force) force=1; shift ;;
+      *) name="$1"; shift ;;
+    esac
+  done
+  [ -z "$name" ] && { print_error "usage: validator rm <name> [--force]"; return 1; }
+  if [ "$name" = "sv" ]; then
+    print_error "sv is infrastructure; controlled by \`canton devrel stop\`"; return 1
+  fi
+  local entry
+  entry=$(registry_get "$name") || {
+    if [ "$force" -eq 1 ] && [ -d "$CANTON_DEVREL_DIR/validators/$name" ]; then
+      print_warning "no registry entry, but recipe dir exists — force-cleaning"
+    else
+      print_error "no such validator '$name'"; return 1
+    fi
+  }
+  if [ -n "$entry" ]; then
+    local type
+    type=$(echo "$entry" | jq -r .type)
+    if [ "$type" = "builtin" ]; then
+      print_error "built-ins cannot be removed; use \`validator stop $name\`"; return 1
+    fi
+  fi
+
+  print_step "Removing custom '$name' (data wiped)…"
+  mapfile -t argv < <(custom_compose_argv "$name")
+  "${argv[@]}" down -v 2>/dev/null || true
+  rm -rf "$CANTON_DEVREL_DIR/validators/$name"
+  remove_nginx_conf "$name"
+  registry_with_lock registry_remove_validator "$name"
+  reload_nginx
+  print_ok "'$name' removed."
+}
