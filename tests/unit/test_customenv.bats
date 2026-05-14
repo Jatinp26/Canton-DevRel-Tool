@@ -5,6 +5,10 @@ setup() {
   TMPHOME="$(mktemp -d)"
   export CANTON_DEVREL_DIR="$TMPHOME"
   export IMAGE_TAG=1.2.3
+  # Fake bundle VERSION so render_custom_env can derive IMAGE_TAG when caller doesn't set it.
+  export BUNDLE_DIR="$TMPHOME/bundle"
+  mkdir -p "$BUNDLE_DIR/splice-node"
+  echo "0.5.18" >"$BUNDLE_DIR/splice-node/VERSION"
   source "$REPO_DIR/scripts/lib/customenv.sh"
 }
 teardown() { rm -rf "$TMPHOME"; }
@@ -30,4 +34,35 @@ teardown() { rm -rf "$TMPHOME"; }
   local n
   n=$(grep -c "PORT_BASE=" "$TMPHOME/validators/acme/env")
   [ "$n" -eq 1 ]
+}
+
+@test "render_custom_env defaults IMAGE_REPO to ghcr.io (matches bundle/localnet)" {
+  unset IMAGE_REPO
+  render_custom_env acme 5900 acme-validator-1
+  grep -q "^IMAGE_REPO=ghcr.io/digital-asset/decentralized-canton-sync/docker/$" \
+    "$TMPHOME/validators/acme/env"
+}
+
+@test "render_custom_env honors caller-provided IMAGE_REPO" {
+  export IMAGE_REPO="example.com/repo/"
+  render_custom_env acme 5900 acme-validator-1
+  grep -q "^IMAGE_REPO=example.com/repo/$" "$TMPHOME/validators/acme/env"
+  unset IMAGE_REPO
+}
+
+@test "render_custom_env derives IMAGE_TAG from bundle VERSION when caller hasn't set one" {
+  unset IMAGE_TAG
+  render_custom_env acme 5900 acme-validator-1
+  grep -q "^IMAGE_TAG=0.5.18$" "$TMPHOME/validators/acme/env"
+}
+
+@test "render_custom_env writes SPLICE_APP_UI_* defaults matching localnet common.env" {
+  render_custom_env acme 5900 acme-validator-1
+  local f="$TMPHOME/validators/acme/env"
+  grep -q '^SPLICE_APP_UI_NETWORK_NAME=Splice$' "$f"
+  grep -q '^SPLICE_APP_UI_AMULET_NAME=Amulet$' "$f"
+  grep -q '^SPLICE_APP_UI_AMULET_NAME_ACRONYM=AMT$' "$f"
+  grep -q '^SPLICE_APP_UI_NAME_SERVICE_NAME=Amulet Name Service$' "$f"
+  grep -q '^SPLICE_APP_UI_NAME_SERVICE_NAME_ACRONYM=ANS$' "$f"
+  grep -q '^SPLICE_APP_UI_NETWORK_FAVICON_URL=' "$f"
 }
