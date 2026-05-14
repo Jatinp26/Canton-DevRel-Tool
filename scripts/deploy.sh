@@ -5,15 +5,25 @@ set -euo pipefail
 
 DEVREL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DEVREL_DIR/scripts/lib/common.sh"
+source "$DEVREL_DIR/scripts/lib/registry.sh"
 
 # ─── Args ─────────────────────────────────────────────────────────────────────
 
+TARGET_VALIDATOR=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --validator) TARGET_VALIDATOR="$2"; shift 2 ;;
+    *) break ;;
+  esac
+done
+
 if [ $# -lt 1 ]; then
   echo ""
-  print_error "Usage: canton devrel deploy <path/to/your-project.dar>"
+  print_error "Usage: canton devrel deploy [--validator <name>] <path/to/your.dar>"
   echo ""
-  echo "  Example:"
+  echo "  Examples:"
   echo "    canton devrel deploy ./my-app/.daml/dist/my-app-0.0.1.dar"
+  echo "    canton devrel deploy --validator acme ./my-app/.daml/dist/my-app-0.0.1.dar"
   echo ""
   exit 1
 fi
@@ -120,8 +130,26 @@ upload_dar() {
   esac
 }
 
-upload_dar "App Provider" 3975 "$PROVIDER_TOKEN"
-upload_dar "App User"     2975 "$USER_TOKEN"
+if [ -n "$TARGET_VALIDATOR" ]; then
+  entry=$(registry_get "$TARGET_VALIDATOR") || {
+    print_error "no such validator '$TARGET_VALIDATOR'"; exit 1
+  }
+  type=$(echo "$entry" | jq -r .type)
+  if [ "$type" = "custom" ]; then
+    pb=$(echo "$entry" | jq -r .port_base)
+    target_port=$((pb + 75))
+  else
+    case "$TARGET_VALIDATOR" in
+      app-provider) target_port=3975 ;;
+      app-user)     target_port=2975 ;;
+      sv)           target_port=4975 ;;
+    esac
+  fi
+  upload_dar "$TARGET_VALIDATOR" "$target_port" "$PROVIDER_TOKEN"
+else
+  upload_dar "App Provider" 3975 "$PROVIDER_TOKEN"
+  upload_dar "App User"     2975 "$USER_TOKEN"
+fi
 
 # ─── Package ID ───────────────────────────────────────────────────────────────
 
