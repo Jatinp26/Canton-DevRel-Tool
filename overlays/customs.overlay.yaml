@@ -2,7 +2,7 @@
 # - Mounts a patched nginx.conf that also globs the customs/ subdir (the bundle's
 #   nginx.conf only includes /etc/nginx/conf.d/*.conf at the top level, so per-
 #   custom server blocks rendered into customs/ would otherwise be invisible).
-# - Surfaces ~/.canton-devrel/nginx-customs/*.conf inside nginx at
+# - Surfaces ~/.canton-builder/nginx-customs/*.conf inside nginx at
 #   /etc/nginx/conf.d/customs/ so wallet.<name>.localhost:5500 can be served.
 # - Exposes nginx on :5500 to host. Port 5500 is chosen over the more obvious
 #   5000 because macOS Monterey+ binds 5000 to AirPlay Receiver by default,

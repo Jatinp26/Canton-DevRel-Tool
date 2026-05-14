@@ -1,15 +1,12 @@
 #!/usr/bin/env bash
-# canton devrel status — registry-driven health + port reference.
 set -euo pipefail
-
 DEVREL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DEVREL_DIR/scripts/lib/common.sh"
 source "$DEVREL_DIR/scripts/lib/registry.sh"
 source "$DEVREL_DIR/scripts/lib/validator.sh"
 
-print_header "Canton DevRel — Network Status"
+print_header "Canton Builder Tool Network Status"
 
-# Validator table (registry-driven; one row per validator + special sv row).
 validator_list
 
 echo ""

@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# Verb implementations for `canton devrel validator <verb>`.
 [[ -n "${_VALIDATOR_SH_LOADED:-}" ]] && return; _VALIDATOR_SH_LOADED=1
 
 # All sibling libs live in the same directory.
@@ -118,7 +117,7 @@ validator_info() {
   fi
   local entry
   if ! entry=$(registry_get "$name"); then
-    print_error "no such validator '$name'; run \`canton devrel validator list\`"
+    print_error "no such validator '$name'; run \`canton builder validator list\`"
     return 1
   fi
   local type port_base party_hint
@@ -326,10 +325,10 @@ validator_start() {
   local name="$1"
   [ -z "$name" ] && { print_error "usage: validator start <name>"; return 1; }
   if [ "$name" = "sv" ]; then
-    print_error "sv is infrastructure; controlled by \`canton devrel start\`"; return 1
+    print_error "sv is infrastructure; controlled by \`canton builder start\`"; return 1
   fi
   if ! _infra_running; then
-    print_error "infra not running; run \`canton devrel start\` first"; return 1
+    print_error "infra not running; run \`canton builder start\` first"; return 1
   fi
   local entry
   if ! entry=$(registry_get "$name"); then
@@ -365,7 +364,7 @@ validator_stop() {
   local name="$1"
   [ -z "$name" ] && { print_error "usage: validator stop <name>"; return 1; }
   if [ "$name" = "sv" ]; then
-    print_error "sv is infrastructure; controlled by \`canton devrel stop\`"; return 1
+    print_error "sv is infrastructure; controlled by \`canton builder stop\`"; return 1
   fi
   local entry
   if ! entry=$(registry_get "$name"); then
@@ -402,7 +401,7 @@ validator_rm() {
   done
   [ -z "$name" ] && { print_error "usage: validator rm <name> [--force]"; return 1; }
   if [ "$name" = "sv" ]; then
-    print_error "sv is infrastructure; controlled by \`canton devrel stop\`"; return 1
+    print_error "sv is infrastructure; controlled by \`canton builder stop\`"; return 1
   fi
   local entry
   entry=$(registry_get "$name") || {

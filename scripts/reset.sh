@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# canton devrel reset [--purge] — wipe ledger data (and optionally state dir).
 set -euo pipefail
-
 DEVREL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DEVREL_DIR/scripts/lib/common.sh"
 source "$DEVREL_DIR/scripts/lib/registry.sh"
@@ -15,7 +13,7 @@ for arg in "$@"; do
   esac
 done
 
-print_header "Canton DevRel — Reset"
+print_header "Canton Builder Tool Reset"
 print_warning "This will DELETE ledger data for:"
 echo "  • All built-in validators (sv, app-provider, app-user)"
 echo "  • All custom validators in the registry"
@@ -52,8 +50,8 @@ fi
 echo ""
 print_ok "Reset complete."
 if [ "$PURGE" -eq 1 ]; then
-  echo "  Runtime state wiped. Next 'canton devrel start' re-downloads the bundle and starts fresh."
+  echo "  Runtime state wiped. Next 'canton builder start' re-downloads the bundle and starts fresh."
 else
-  echo "  Registry preserved. Next 'canton devrel start' brings the same shape back with fresh ledgers."
+  echo "  Registry preserved. Next 'canton builder start' brings the same shape back with fresh ledgers."
 fi
 echo ""

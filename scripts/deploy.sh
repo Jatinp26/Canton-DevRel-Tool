@@ -1,13 +1,8 @@
 #!/usr/bin/env bash
-# canton devrel deploy [--validator <name>] <path/to/your.dar>
-# Uploads a pre-built DAR to one or all running validators (excluding sv).
 set -euo pipefail
-
 DEVREL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DEVREL_DIR/scripts/lib/common.sh"
 source "$DEVREL_DIR/scripts/lib/registry.sh"
-
-# ─── Args ─────────────────────────────────────────────────────────────────────
 
 TARGET_VALIDATOR=""
 while [ $# -gt 0 ]; do
@@ -19,17 +14,15 @@ done
 
 if [ $# -lt 1 ]; then
   echo ""
-  print_error "Usage: canton devrel deploy [--validator <name>] <path/to/your.dar>"
+  print_error "Usage: canton builder deploy [--validator <name>] <path/to/your.dar>"
   echo ""
   echo "  Examples:"
-  echo "    canton devrel deploy ./my-app/.daml/dist/my-app-0.0.1.dar"
-  echo "    canton devrel deploy --validator acme ./my-app/.daml/dist/my-app-0.0.1.dar"
+  echo "    canton builder deploy ./my-app/.daml/dist/my-app-0.0.1.dar"
+  echo "    canton builder deploy --validator acme ./my-app/.daml/dist/my-app-0.0.1.dar"
   echo ""
   exit 1
 fi
-
 DAR_PATH="$1"
-
 if [ ! -f "$DAR_PATH" ]; then
   print_error "DAR file not found: $DAR_PATH"
   exit 1
@@ -37,14 +30,9 @@ fi
 
 DAR_FILENAME=$(basename "$DAR_PATH")
 DAR_SIZE=$(du -sh "$DAR_PATH" | cut -f1)
-
-print_header "Canton DevRel — Deploying DAR"
+print_header "Deploying DAR"
 echo "  File: $DAR_FILENAME ($DAR_SIZE)"
 echo ""
-
-# ─── Resolve target validators ────────────────────────────────────────────────
-# Each entry in TARGETS is "name:port_base". Default (no --validator) is every
-# running validator in the registry except sv; --validator <name> selects one.
 
 declare -a TARGETS=()
 
@@ -82,12 +70,10 @@ else
 
   if [ ${#TARGETS[@]} -eq 0 ]; then
     print_error "No running validators found in the registry."
-    echo "  Try: canton devrel start  (or: canton devrel validator start <name>)"
+    echo "  Try: canton builder start  (or: canton builder validator start <name>)"
     exit 1
   fi
 fi
-
-# ─── Check validators are up ──────────────────────────────────────────────────
 
 print_step "Checking validators are reachable..."
 for target in "${TARGETS[@]}"; do
@@ -95,16 +81,11 @@ for target in "${TARGETS[@]}"; do
   port=$((pb + 3))
   if ! curl -fs "http://localhost:${port}/api/validator/readyz" &>/dev/null; then
     print_error "Validator '$name' (validator API port $port) is not responding."
-    echo "  Is LocalNet running? Try: canton devrel start"
+    echo "  Is LocalNet running? Try: canton builder start"
     exit 1
   fi
 done
 print_ok "Validators reachable"
-
-# ─── Generate JWT ─────────────────────────────────────────────────────────────
-# The official Splice LocalNet uses HS256-signed JWTs.
-# Secret: SPLICE_APP_UI_UNSAFE_SECRET (default: "unsafe")
-# Audience: from AUTH_APP_PROVIDER_AUDIENCE env in the splice container
 
 BUNDLE_COMMON_ENV="$LOCALNET_DIR/env/common.env"
 SECRET="unsafe"
@@ -114,47 +95,34 @@ if [ -f "$BUNDLE_COMMON_ENV" ]; then
   [ -n "$PARSED" ] && SECRET="$PARSED"
 fi
 
-# Base64url encode — no padding, URL-safe chars
 b64url() {
   printf '%s' "$1" | base64 | tr '+/' '-_' | tr -d '=' | tr -d '\n'
 }
-
 make_jwt() {
   local user="$1"
   local audience="$2"
   local exp
-  exp=$(( $(date +%s) + 86400 ))  # 24 hours
-
+  exp=$(( $(date +%s) + 86400 ))  
   local header
   header=$(b64url '{"alg":"HS256","typ":"JWT"}')
-
   local payload
   payload=$(b64url "{\"sub\":\"${user}\",\"aud\":\"${audience}\",\"exp\":${exp}}")
-
   local signing_input="${header}.${payload}"
   local sig
   sig=$(printf '%s' "$signing_input" | openssl dgst -sha256 -hmac "$SECRET" -binary | \
     base64 | tr '+/' '-_' | tr -d '=' | tr -d '\n')
-
   printf '%s' "${signing_input}.${sig}"
 }
-
 print_step "Generating JWT token (HS256, secret: ${SECRET})..."
-
 PROVIDER_TOKEN=$(make_jwt "ledger-api-user" "https://canton.network.global")
-
 print_ok "Token generated"
-
-# ─── Upload DAR ───────────────────────────────────────────────────────────────
 
 upload_dar() {
   local name="$1"
   local port="$2"
   local token="$3"
-
   echo ""
   print_step "Uploading to ${name} (port ${port})..."
-
   HTTP_CODE=$(curl -s -o /dev/null -w "%{http_code}" -X POST \
     "http://localhost:${port}/v2/packages" \
     -H "Authorization: Bearer ${token}" \
@@ -182,8 +150,6 @@ for target in "${TARGETS[@]}"; do
   upload_dar "$name" "$json_port" "$PROVIDER_TOKEN"
 done
 
-# ─── Package ID ───────────────────────────────────────────────────────────────
-
 echo ""
 print_step "Resolving package ID..."
 
@@ -206,13 +172,11 @@ if command -v dpm &>/dev/null; then
     echo "      -d '{...}'"
   fi
 else
-  print_warning "dpm not found — install dpm to get your package ID automatically."
+  print_warning "dpm not found, install dpm to get your package ID automatically."
 fi
 
-# ─── Done ─────────────────────────────────────────────────────────────────────
-
 echo ""
-echo -e "${GREEN}${BOLD}  ✓ DAR deployed successfully to LocalNet!${NC}"
+echo -e "${GREEN}${BOLD} DAR deployed successfully to LocalNet!${NC}"
 echo ""
 echo "  Your token for API calls (valid 24h):"
 echo "    $PROVIDER_TOKEN"

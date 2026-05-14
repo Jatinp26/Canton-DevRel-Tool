@@ -3,8 +3,8 @@
 [[ -n "${_COMPOSE_SH_LOADED:-}" ]] && return; _COMPOSE_SH_LOADED=1
 
 # Paths set by callers (common.sh) — but provide defaults so the lib is usable standalone.
-LOCALNET_DIR="${LOCALNET_DIR:-$HOME/.canton-devrel/bundle/splice-node/docker-compose/localnet}"
-VALIDATOR_BUNDLE_DIR="${VALIDATOR_BUNDLE_DIR:-$HOME/.canton-devrel/bundle/splice-node/docker-compose/validator}"
+LOCALNET_DIR="${LOCALNET_DIR:-$HOME/.canton-builder/bundle/splice-node/docker-compose/localnet}"
+VALIDATOR_BUNDLE_DIR="${VALIDATOR_BUNDLE_DIR:-$HOME/.canton-builder/bundle/splice-node/docker-compose/validator}"
 OVERLAYS_DIR="${OVERLAYS_DIR:-$REPO_DIR/overlays}"
 
 # Print one argv element per line: full docker compose argv for the localnet project.

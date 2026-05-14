@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# Atomic JSON registry under ~/.canton-devrel/validators.json.
+# Atomic JSON registry under ~/.canton-builder/validators.json.
 [[ -n "${_REGISTRY_SH_LOADED:-}" ]] && return; _REGISTRY_SH_LOADED=1
 
-CANTON_DEVREL_DIR="${CANTON_DEVREL_DIR:-$HOME/.canton-devrel}"
+CANTON_DEVREL_DIR="${CANTON_DEVREL_DIR:-$HOME/.canton-builder}"
 REGISTRY_FILE="$CANTON_DEVREL_DIR/validators.json"
 REGISTRY_LOCK="$CANTON_DEVREL_DIR/.registry.lock"
 

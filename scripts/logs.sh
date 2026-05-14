@@ -1,7 +1,5 @@
 #!/usr/bin/env bash
-# canton devrel logs [--validator <name>] [service]
 set -euo pipefail
-
 DEVREL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DEVREL_DIR/scripts/lib/common.sh"
 source "$DEVREL_DIR/scripts/lib/compose.sh"
@@ -15,7 +13,6 @@ while [ $# -gt 0 ]; do
 done
 
 SERVICE="${1:-}"
-
 echo ""
 if [ -n "$VALIDATOR" ]; then
   print_step "Tailing logs for validator-$VALIDATOR ${SERVICE:+(service: $SERVICE)}"

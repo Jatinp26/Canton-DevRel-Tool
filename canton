@@ -1,38 +1,32 @@
 #!/usr/bin/env bash
-# canton — Canton Network Developer CLI
-# Built by Canton Foundation Developer Relations
-# https://github.com/canton-foundation/canton-devrel
+
 set -euo pipefail
-
-CANTON_DEVREL_DIR="${CANTON_DEVREL_DIR:-$HOME/.canton-devrel}"
+CANTON_DEVREL_DIR="${CANTON_DEVREL_DIR:-$HOME/.canton-builder}"
 VERSION="0.1.0"
-
-# ─── Help ─────────────────────────────────────────────────────────────────────
 
 usage() {
   cat <<EOF
-
-  canton — Canton Network Developer CLI  (v${VERSION})
+  Canton Builder Tool CLI  (v${VERSION})
 
   USAGE
-    canton devrel <command> [args]
+    canton builder <command> [args]
 
   COMMANDS
     start               Boot the full Canton LocalNet (validators, wallets, Keycloak, PQS)
     stop                Stop all LocalNet containers (data preserved)
     status              Show health and port reference for all services
-    deploy <file.dar>   Upload a pre-built DAR to App Provider + App User participants
+    deploy <file.dar>   Upload a prebuilt DAR to App Provider + App User participants
     logs [service]      Tail container logs (optionally filter to one service)
-    reset               Wipe all data and stop containers — full clean slate
+    reset               Wipe all data and stop containers, full clean slate
     validator <verb>    Manage validators (list, add, start, stop, rm, info)
     version             Print version info
 
   EXAMPLES
-    canton devrel start
-    canton devrel status
-    canton devrel deploy ./my-app/.daml/dist/my-app-0.0.1.dar
-    canton devrel logs splice
-    canton devrel reset
+    canton builder start
+    canton builder status
+    canton builder deploy ./my-app/.daml/dist/my-app-0.0.1.dar
+    canton builder logs splice
+    canton builder reset
 
   SERVICES FOR LOGS
     canton              Canton participant node
@@ -56,19 +50,14 @@ usage() {
 EOF
 }
 
-# ─── Version ──────────────────────────────────────────────────────────────────
-
 if [[ "${1:-}" == "version" || "${1:-}" == "--version" || "${1:-}" == "-v" ]]; then
-  echo "canton devrel v${VERSION}"
+  echo "canton builder v${VERSION}"
   exit 0
 fi
 
-# ─── Route subcommands ────────────────────────────────────────────────────────
-
 SUBCOMMAND="${1:-}"
 DEVREL_COMMAND="${2:-}"
-
-if [[ "$SUBCOMMAND" != "devrel" ]]; then
+if [[ "$SUBCOMMAND" != "builder" ]]; then
   echo ""
   echo "  Unknown command: ${SUBCOMMAND}"
   usage
@@ -105,14 +94,14 @@ case "$DEVREL_COMMAND" in
     exec "$CANTON_DEVREL_DIR/scripts/validator.sh" "$@"
     ;;
   version|--version|-v)
-    echo "canton devrel v${VERSION}"
+    echo "canton builder v${VERSION}"
     ;;
   ""|help|--help|-h)
     usage
     ;;
   *)
     echo ""
-    echo "  Unknown devrel command: $DEVREL_COMMAND"
+    echo "  Unknown builder command: $DEVREL_COMMAND"
     usage
     exit 1
     ;;

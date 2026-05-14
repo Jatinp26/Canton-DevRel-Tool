@@ -1,5 +1,4 @@
 #!/usr/bin/env bash
-# canton devrel validator <verb> [args]
 set -euo pipefail
 
 REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -18,7 +17,7 @@ case "$VERB" in
   ""|help|--help|-h)
     cat <<EOF
 USAGE
-  canton devrel validator <verb> [args]
+  canton builder validator <verb> [args]
 
 VERBS
   list                          List all validators (built-in + custom)
@@ -29,17 +28,17 @@ VERBS
   rm <name> [--force]           Remove a custom validator (built-ins can't be removed)
 
 EXAMPLES
-  canton devrel validator list
-  canton devrel validator add acme
-  canton devrel validator add bob --port-base 7900
-  canton devrel validator info acme
-  canton devrel validator stop acme
-  canton devrel validator rm acme
+  canton builder validator list
+  canton builder validator add acme
+  canton builder validator add bob --port-base 7900
+  canton builder validator info acme
+  canton builder validator stop acme
+  canton builder validator rm acme
 EOF
     ;;
   *)
     echo "unknown verb: $VERB" >&2
-    echo "run 'canton devrel validator help' for usage" >&2
+    echo "run 'canton builder validator help' for usage" >&2
     exit 1
     ;;
 esac

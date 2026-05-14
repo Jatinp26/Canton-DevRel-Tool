@@ -31,7 +31,7 @@ _validate_names() {
     fi
     if _is_builtin "$n"; then continue; fi
     if _is_custom_in_registry "$n"; then continue; fi
-    echo "no such validator '$n'; run \`canton devrel validator list\`" >&2; return 1
+    echo "no such validator '$n'; run \`canton builder validator list\`" >&2; return 1
   done <<< "$1"
 }
 
