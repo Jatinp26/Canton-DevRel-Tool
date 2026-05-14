@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# Build docker compose argv arrays for the localnet (infra) and per-custom projects.
+[[ -n "${_COMPOSE_SH_LOADED:-}" ]] && return; _COMPOSE_SH_LOADED=1
+
+# Paths set by callers (common.sh) — but provide defaults so the lib is usable standalone.
+LOCALNET_DIR="${LOCALNET_DIR:-$HOME/.canton-devrel/bundle/splice-node/docker-compose/localnet}"
+VALIDATOR_BUNDLE_DIR="${VALIDATOR_BUNDLE_DIR:-$HOME/.canton-devrel/bundle/splice-node/docker-compose/validator}"
+OVERLAYS_DIR="${OVERLAYS_DIR:-$REPO_DIR/overlays}"
+
+# Print one argv element per line: full docker compose argv for the localnet project.
+# Caller is responsible for exporting *_PROFILE env vars beforehand.
+infra_compose_argv() {
+  cat <<EOF
+docker
+compose
+-p
+localnet
+--env-file
+$LOCALNET_DIR/compose.env
+--env-file
+$LOCALNET_DIR/env/common.env
+-f
+$LOCALNET_DIR/compose.yaml
+-f
+$LOCALNET_DIR/resource-constraints.yaml
+-f
+$OVERLAYS_DIR/customs.overlay.yaml
+EOF
+}
+
+# Print one argv element per line: full docker compose argv for the per-custom project.
+# Reads ~/.canton-devrel/validators/<name>/env for env-file injection.
+custom_compose_argv() {
+  local name="$1"
+  local envfile="$CANTON_DEVREL_DIR/validators/$name/env"
+  cat <<EOF
+docker
+compose
+-p
+validator-$name
+--env-file
+$envfile
+-f
+$VALIDATOR_BUNDLE_DIR/compose.yaml
+-f
+$VALIDATOR_BUNDLE_DIR/compose-disable-auth.yaml
+-f
+$OVERLAYS_DIR/attach-localnet.overlay.yaml
+EOF
+}
+
+# Convenience: read the lines into an array and execute.
+infra_compose() {
+  mapfile -t argv < <(infra_compose_argv)
+  "${argv[@]}" "$@"
+}
+
+custom_compose() {
+  local name="$1"; shift
+  mapfile -t argv < <(custom_compose_argv "$name")
+  "${argv[@]}" "$@"
+}
