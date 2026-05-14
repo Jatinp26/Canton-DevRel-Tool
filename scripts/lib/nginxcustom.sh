@@ -14,7 +14,7 @@ render_nginx_conf() {
 # Serves the custom validator's wallet UI via the localnet nginx.
 
 server {
-  listen 5000;
+  listen 5500;
   server_name wallet.$name.localhost;
 
   location / {
@@ -27,7 +27,7 @@ server {
 }
 
 server {
-  listen 5000;
+  listen 5500;
   server_name ans.$name.localhost;
 
   location / {

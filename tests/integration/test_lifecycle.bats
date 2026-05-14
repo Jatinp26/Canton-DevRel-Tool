@@ -38,7 +38,7 @@ teardown() {
   "$REPO_DIR/canton" devrel start
   "$REPO_DIR/canton" devrel validator add acme
   curl -fs http://localhost:5903/api/validator/readyz
-  run curl -fs --max-time 3 --resolve wallet.acme.localhost:5000:127.0.0.1 http://wallet.acme.localhost:5000
+  run curl -fs --max-time 3 --resolve wallet.acme.localhost:5500:127.0.0.1 http://wallet.acme.localhost:5500
   [ "$status" -eq 0 ]
 }
 

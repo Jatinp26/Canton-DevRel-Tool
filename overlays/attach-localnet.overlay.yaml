@@ -1,7 +1,7 @@
 # Overlay applied to every per-custom validator-<name> project.
 # Attaches the validator to the shared 'localnet' network created by the
 # localnet stack, and removes the per-project nginx host binding (UI is
-# served via localnet's nginx on :5000 with wallet.<name>.localhost).
+# served via localnet's nginx on :5500 with wallet.<name>.localhost).
 networks:
   localnet:
     external: true

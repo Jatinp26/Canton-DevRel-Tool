@@ -97,7 +97,7 @@ validator_list() {
     url=$(_health_check_url "$entry")
     health=DOWN; _is_healthy "$url" && health=UP
     if [ "$type" = "custom" ]; then
-      wallet="http://wallet.$name.localhost:5000"
+      wallet="http://wallet.$name.localhost:5500"
     else
       wallet=$(_builtin_wallet_url "$name")
     fi
@@ -128,7 +128,7 @@ validator_info() {
     port_base=$(echo "$entry" | jq -r .port_base)
     print_header "$name (custom)"
     echo "  Party hint:    $party_hint"
-    echo "  Wallet:        http://wallet.$name.localhost:5000"
+    echo "  Wallet:        http://wallet.$name.localhost:5500"
     echo "  JSON API:      http://localhost:$((port_base + 75))"
     echo "  Ledger API:    localhost:$((port_base + 1)) (gRPC)"
     echo "  Validator API: http://localhost:$((port_base + 3))"
@@ -277,7 +277,7 @@ validator_add() {
   registry_with_lock registry_set_running "$name" true
 
   print_ok "Validator '$name' is up."
-  echo "  Wallet:    http://wallet.$name.localhost:5000"
+  echo "  Wallet:    http://wallet.$name.localhost:5500"
   echo "  JSON API:  http://localhost:$((port_base + 75))"
   echo "  Party:     $party_hint"
 }

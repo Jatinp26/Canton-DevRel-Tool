@@ -11,7 +11,7 @@ PORT_BASE_MAX_RETRIES=10
 #   N+1   ledger API (gRPC)
 #   N+3   validator API / readyz
 #   N+75  JSON API
-#   (N-900 wallet UI host port is NOT bound for customs; nginx serves :5000.)
+#   (N-900 wallet UI host port is NOT bound for customs; nginx serves :5500.)
 _derived_ports() {
   local n="$1"
   echo $((n + 1))
