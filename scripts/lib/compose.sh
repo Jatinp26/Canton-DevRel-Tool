@@ -8,7 +8,9 @@ VALIDATOR_BUNDLE_DIR="${VALIDATOR_BUNDLE_DIR:-$HOME/.canton-devrel/bundle/splice
 OVERLAYS_DIR="${OVERLAYS_DIR:-$REPO_DIR/overlays}"
 
 # Print one argv element per line: full docker compose argv for the localnet project.
-# Caller is responsible for exporting *_PROFILE env vars beforehand.
+# Profile flags are appended based on *_PROFILE env vars. Unset == "on" so that
+# broad-coverage callers (stop, logs, reset) target every profile by default,
+# while `start` can opt specific built-ins out by setting them to "off".
 infra_compose_argv() {
   cat <<EOF
 docker
@@ -25,7 +27,15 @@ $LOCALNET_DIR/compose.yaml
 $LOCALNET_DIR/resource-constraints.yaml
 -f
 $OVERLAYS_DIR/customs.overlay.yaml
+--profile
+sv
 EOF
+  if [ "${APP_PROVIDER_PROFILE:-on}" != "off" ]; then
+    printf '%s\n' "--profile" "app-provider"
+  fi
+  if [ "${APP_USER_PROFILE:-on}" != "off" ]; then
+    printf '%s\n' "--profile" "app-user"
+  fi
 }
 
 # Print one argv element per line: full docker compose argv for the per-custom project.
