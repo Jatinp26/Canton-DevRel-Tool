@@ -34,6 +34,14 @@ fi
 # Where the official Splice bundle extracts to
 BUNDLE_DIR="${BUNDLE_DIR:-$HOME/.canton-devrel/bundle}"
 LOCALNET_DIR="$BUNDLE_DIR/splice-node/docker-compose/localnet"
+VALIDATOR_BUNDLE_DIR="$BUNDLE_DIR/splice-node/docker-compose/validator"
+
+# Repo paths (this file is at scripts/lib/common.sh).
+REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+OVERLAYS_DIR="$REPO_DIR/overlays"
+
+# Runtime state dir — the registry, recipes, nginx-customs all live here.
+CANTON_DEVREL_DIR="${CANTON_DEVREL_DIR:-$HOME/.canton-devrel}"
 
 # ── Official LocalNet compose command ─────────────────────────────────────────
 # Exactly as documented at docs.sync.global/app_dev/testing/localnet.html
