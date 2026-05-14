@@ -88,9 +88,9 @@ canton builder validator start acme            # bring back with existing ledger
 canton builder validator rm acme               # full delete (data + recipe)
 ```
 
-Each custom validator joins the same local SV. Wallet UI is served via the localnet nginx on `:5000`:
+Each custom validator joins the same local SV. Wallet UI is served via the localnet nginx on `:5500`:
 
-- `http://wallet.acme.localhost:5000`  — wallet UI
+- `http://wallet.acme.localhost:5500`  — wallet UI
 - `http://localhost:5975`               — JSON ledger API (port_base + 75)
 - `http://localhost:5903/api/validator/readyz`  — health probe
 
