@@ -1,0 +1,17 @@
+# Workaround for a Splice v0.5.18 bundle bug.
+#
+# The bundle's env/app-user-auth-on.env and env/app-provider-auth-on.env set:
+#   APP_USER_PARTY_HINT=app_user_${PARTY_HINT}
+#   APP_PROVIDER_PARTY_HINT=app_provider_${PARTY_HINT}
+#
+# Splice v0.5.18 validates these against <alphanumeric>-<alphanumeric>-<int>.
+# The literal `app_user_` / `app_provider_` prefixes contain underscores,
+# so the resulting hints always fail validation regardless of PARTY_HINT.
+# Splice exits 0 on init failure; restart: always loops it forever.
+#
+# `environment:` here overrides the values supplied via env_file:.
+services:
+  splice:
+    environment:
+      APP_USER_PARTY_HINT: appuser-localparty-1
+      APP_PROVIDER_PARTY_HINT: appprovider-localparty-1

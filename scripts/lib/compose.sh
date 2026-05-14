@@ -27,6 +27,8 @@ $LOCALNET_DIR/compose.yaml
 $LOCALNET_DIR/resource-constraints.yaml
 -f
 $OVERLAYS_DIR/customs.overlay.yaml
+-f
+$OVERLAYS_DIR/party-hint.overlay.yaml
 --profile
 sv
 EOF
