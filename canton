@@ -41,7 +41,7 @@ usage() {
     App User JSON API      →  http://localhost:2975
     App Provider Wallet    →  http://wallet.localhost:3000
     App User Wallet        →  http://wallet.localhost:2000
-    Custom Wallets         →  http://wallet.<name>.localhost:5000
+    Custom Wallets         →  http://wallet.<name>.localhost:5500
     Scan UI                →  http://scan.localhost:4000
     Keycloak               →  http://keycloak.localhost:8082
 
