@@ -4,8 +4,31 @@ set -euo pipefail
 
 DEVREL_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 source "$DEVREL_DIR/scripts/lib/common.sh"
+source "$DEVREL_DIR/scripts/lib/registry.sh"
+source "$DEVREL_DIR/scripts/lib/resolve.sh"
+source "$DEVREL_DIR/scripts/lib/compose.sh"
+
+# ── Flag parsing: --validators/--only/--with/--without ────────────────────────
+ABSOLUTE="" WITH="" WITHOUT=""
+while [ $# -gt 0 ]; do
+  case "$1" in
+    --validators|--only) ABSOLUTE="$2"; shift 2 ;;
+    --with)              WITH="$2"; shift 2 ;;
+    --without)           WITHOUT="$2"; shift 2 ;;
+    *) print_error "unknown flag: $1"; exit 1 ;;
+  esac
+done
+
+RESOLVE_ARGS=()
+[ -n "$ABSOLUTE" ] && RESOLVE_ARGS+=(--absolute "$ABSOLUTE")
+[ -n "$WITH" ]     && RESOLVE_ARGS+=(--with "$WITH")
+[ -n "$WITHOUT" ]  && RESOLVE_ARGS+=(--without "$WITHOUT")
+
+RESOLVED=$(resolve_active_set "${RESOLVE_ARGS[@]}") || exit 1
+eval "$(echo "$RESOLVED" | sed 's/^/export /')"
 
 print_header "Canton DevRel — Starting LocalNet"
+print_step "Active set: SV(on) APP_PROVIDER($APP_PROVIDER_PROFILE) APP_USER($APP_USER_PROFILE) CUSTOMS(${CUSTOMS:-none})"
 
 # ── Preflight: Docker ─────────────────────────────────────────────────────────
 if ! docker info &>/dev/null; then
@@ -105,14 +128,26 @@ fi
 
 # ── Pull images ───────────────────────────────────────────────────────────────
 print_step "Pulling Canton Network images (first run: ~3-5 min, then cached)..."
-"${COMPOSE_CMD[@]}" pull --quiet 2>/dev/null || {
+mapfile -t INFRA_ARGV < <(infra_compose_argv)
+"${INFRA_ARGV[@]}" pull --quiet 2>/dev/null || {
   print_warning "Silent pull failed — retrying with output..."
-  "${COMPOSE_CMD[@]}" pull
+  "${INFRA_ARGV[@]}" pull
 }
 
 # ── Start ─────────────────────────────────────────────────────────────────────
 print_step "Starting LocalNet..."
-"${COMPOSE_CMD[@]}" up -d --remove-orphans
+"${INFRA_ARGV[@]}" up -d --remove-orphans
+
+# ── Start custom validators in the active set ───────────────────────────────
+if [ -n "${CUSTOMS:-}" ]; then
+  IFS=',' read -ra CUSTOM_NAMES <<< "$CUSTOMS"
+  for n in "${CUSTOM_NAMES[@]}"; do
+    [ -z "$n" ] && continue
+    print_step "Starting custom validator '$n'…"
+    mapfile -t CUSTOM_ARGV < <(custom_compose_argv "$n")
+    "${CUSTOM_ARGV[@]}" up -d
+  done
+fi
 
 # ── Wait for validators ───────────────────────────────────────────────────────
 print_step "Waiting for validators to be ready..."
@@ -140,9 +175,22 @@ wait_for_validator() {
 }
 
 FAILED=0
-wait_for_validator "Super Validator"  4903 || FAILED=1
-wait_for_validator "App Provider"     3903 || FAILED=1
-wait_for_validator "App User"         2903 || FAILED=1
+wait_for_validator "Super Validator" 4903 || FAILED=1
+if [ "$APP_PROVIDER_PROFILE" = "on" ]; then
+  wait_for_validator "App Provider" 3903 || FAILED=1
+fi
+if [ "$APP_USER_PROFILE" = "on" ]; then
+  wait_for_validator "App User" 2903 || FAILED=1
+fi
+if [ -n "${CUSTOMS:-}" ]; then
+  IFS=',' read -ra CUSTOM_NAMES <<< "$CUSTOMS"
+  for n in "${CUSTOM_NAMES[@]}"; do
+    [ -z "$n" ] && continue
+    entry=$(registry_get "$n") || continue
+    pb=$(echo "$entry" | jq -r .port_base)
+    wait_for_validator "$n" $((pb + 3)) || FAILED=1
+  done
+fi
 echo ""
 
 if [ $FAILED -eq 1 ]; then
@@ -152,6 +200,12 @@ if [ $FAILED -eq 1 ]; then
   echo "  Reset:        canton devrel reset && canton devrel start"
   exit 1
 fi
+
+# ── Register the active set in the registry (lazy-create built-in entries) ──
+registry_with_lock registry_upsert_validator app-provider builtin "" "" \
+  "$( [ "$APP_PROVIDER_PROFILE" = "on" ] && echo true || echo false )"
+registry_with_lock registry_upsert_validator app-user builtin "" "" \
+  "$( [ "$APP_USER_PROFILE" = "on" ] && echo true || echo false )"
 
 # ── Done ──────────────────────────────────────────────────────────────────────
 print_header "LocalNet is up! 🎉"
