@@ -56,6 +56,14 @@ teardown() { rm -rf "$TMPHOME"; }
   grep -q "^IMAGE_TAG=0.5.18$" "$TMPHOME/validators/acme/env"
 }
 
+@test "render_custom_env writes PARTICIPANT_IDENTIFIER (defaults to party_hint, mirroring bundle start.sh)" {
+  # Bundle's validator/.env leaves PARTICIPANT_IDENTIFIER empty. compose.yaml
+  # passes it through as SPLICE_APP_VALIDATOR_PARTICIPANT_IDENTIFIER. If empty,
+  # the validator crashes with "Daml-LF Party is empty" during NodeInitializer.
+  render_custom_env acme 5900 acme-validator-1
+  grep -q "^PARTICIPANT_IDENTIFIER=acme-validator-1$" "$TMPHOME/validators/acme/env"
+}
+
 @test "render_custom_env writes SPLICE_APP_UI_* defaults matching localnet common.env" {
   render_custom_env acme 5900 acme-validator-1
   local f="$TMPHOME/validators/acme/env"

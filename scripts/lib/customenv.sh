@@ -58,8 +58,13 @@ SPLICE_APP_UI_AMULET_NAME_ACRONYM=AMT
 SPLICE_APP_UI_NAME_SERVICE_NAME=Amulet Name Service
 SPLICE_APP_UI_NAME_SERVICE_NAME_ACRONYM=ANS
 
-# Identity
+# Identity. PARTICIPANT_IDENTIFIER must be non-empty: the validator bundle's
+# compose passes it through as SPLICE_APP_VALIDATOR_PARTICIPANT_IDENTIFIER and
+# the validator's NodeInitializer crashes with "Daml-LF Party is empty" if it's
+# blank. Bundle's start.sh defaults it to PARTY_HINT when not explicitly given;
+# we mirror that.
 PARTY_HINT=$party_hint
+PARTICIPANT_IDENTIFIER=$party_hint
 VALIDATOR_NAME=$name
 
 # Host ports — derived from PORT_BASE.
