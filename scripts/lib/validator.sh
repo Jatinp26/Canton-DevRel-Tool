@@ -49,6 +49,37 @@ _is_healthy() {
   curl -fs --max-time 2 "$url" >/dev/null 2>&1
 }
 
+# Mint a one-time onboarding secret from the SV's DevNet prepare endpoint.
+# The bundle's SV hard-codes expected-validator-onboardings to just the two
+# built-in (app-provider, app-user) secrets, so a custom validator that sends
+# anything else — including an empty string — gets 401 "Unknown secret" during
+# onboarding. SPLICE_SV_IS_DEVNET=true (our localnet's default) gates this
+# endpoint open. The response body IS the opaque secret token (a base64 JSON
+# envelope); the validator's start.sh passes it through to SPLICE_APP_VALIDATOR_
+# ONBOARDING_SECRET, and the SV decodes it server-side. Do not parse.
+_fetch_onboarding_secret() {
+  local url="${SV_SPONSOR_HOST_URL:-http://sv.localhost:4000}/api/sv/v0/devnet/onboard/validator/prepare"
+  local tmpfile http_code
+  tmpfile=$(mktemp)
+  if ! http_code=$(curl -sS --max-time 10 -X POST -o "$tmpfile" -w '%{http_code}' "$url" 2>>"$tmpfile.err"); then
+    print_error "failed to reach SV at $url: $(cat "$tmpfile.err" 2>/dev/null)" >&2
+    rm -f "$tmpfile" "$tmpfile.err"
+    return 1
+  fi
+  if [ "$http_code" != "200" ]; then
+    print_error "SV prepare endpoint returned HTTP $http_code: $(cat "$tmpfile")" >&2
+    rm -f "$tmpfile" "$tmpfile.err"
+    return 1
+  fi
+  if [ ! -s "$tmpfile" ]; then
+    print_error "SV prepare endpoint returned an empty body" >&2
+    rm -f "$tmpfile" "$tmpfile.err"
+    return 1
+  fi
+  cat "$tmpfile"
+  rm -f "$tmpfile" "$tmpfile.err"
+}
+
 validator_list() {
   print_header "Validators"
   printf "  %-16s %-8s %-8s %-10s %s\n" NAME TYPE INTENT HEALTH WALLET
@@ -207,8 +238,17 @@ validator_add() {
     || { print_error "registry write failed"; return 1; }
   ADD_STEPS+=(registry)
 
-  # 2. env file
-  render_custom_env "$name" "$port_base" "$party_hint" \
+  # 2. mint a fresh onboarding secret from the SV's DevNet prepare endpoint.
+  # No rollback step needed — the token expires in ~1h and the SV has no
+  # release endpoint; an unused one just ages out.
+  print_step "Requesting onboarding secret from SV…"
+  local onboarding_secret
+  if ! onboarding_secret=$(_fetch_onboarding_secret); then
+    _undo; print_error "could not fetch onboarding secret from SV"; return 1
+  fi
+
+  # 3. env file
+  render_custom_env "$name" "$port_base" "$party_hint" "$onboarding_secret" \
     || { _undo; print_error "render env failed"; return 1; }
   ADD_STEPS+=(envfile)
 

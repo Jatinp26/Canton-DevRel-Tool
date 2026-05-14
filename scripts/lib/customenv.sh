@@ -21,7 +21,7 @@ _resolve_image_tag() {
 }
 
 render_custom_env() {
-  local name="$1" port_base="$2" party_hint="$3"
+  local name="$1" port_base="$2" party_hint="$3" onboarding_secret="$4"
   local dir="$CANTON_DEVREL_DIR/validators/$name"
   mkdir -p "$dir"
   local f="$dir/env"
@@ -41,8 +41,12 @@ MIGRATION_ID=${MIGRATION_ID:-0}
 SPONSOR_SV_ADDRESS=http://splice:5014
 SCAN_ADDRESS=http://splice:5012
 
-# HS256-unsafe matches bundle built-ins; auto-onboarding via SPLICE_SV_IS_DEVNET=true.
-ONBOARDING_SECRET=""
+# HS256-unsafe matches bundle built-ins. ONBOARDING_SECRET is a one-time token
+# minted by the SV's /api/sv/v0/devnet/onboard/validator/prepare endpoint and
+# passed in by validator_add — empty would be rejected as "Unknown secret"
+# because the SV's expected-validator-onboardings list is hard-coded to the
+# two built-in app-provider/app-user secrets.
+ONBOARDING_SECRET="$onboarding_secret"
 SPLICE_APP_UI_UNSAFE=true
 SPLICE_APP_UI_UNSAFE_SECRET=unsafe
 VALIDATOR_AUTH_AUDIENCE=https://canton.network.global
