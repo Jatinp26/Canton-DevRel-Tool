@@ -3,3 +3,7 @@ bundle/
 *.tar.gz
 docs/
 tests/.bats/
+validators.json
+.registry.lock
+nginx-customs/
+validators/
