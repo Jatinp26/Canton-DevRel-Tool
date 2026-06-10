@@ -150,4 +150,4 @@ This is the fast start layer of the BuidL Experience on Canton.
 | Build a full Canton app with backend, auth, frontend | [cn-quickstart](https://github.com/digital-asset/cn-quickstart) |
 | Browse all Canton tools, SDKs, and APIs | [Canton Dev Toolings Guide](https://github.com/canton-network-devs/Canton-Developer-Hub/blob/main/Canton%20Dev%20Toolings%20Guide.md) |
 
-> *Built by [Jatin Pandya](https://x.com/Jpandya26), Developer Relations Manager, Canton Foundation.*
+> *Built by Developer Relations at Canton Foundation.*
