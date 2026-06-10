@@ -9,7 +9,7 @@ Built for hackathons, bootcamps, and anyone who needs a local Canton Network wit
 **macOS / Linux** (WSL 2 on Windows):
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/Jatinp26/Canton-Builder-Tool/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/canton-network-devs/Canton-Builder-Tool/main/install.sh | bash
 ```
 
 Then reload your shell:
@@ -198,8 +198,8 @@ This is the fast start layer of the BuidL Experience on Canton.
 
 | Want more? | Where to go |
 |---|---|
-| Understand LocalNet deeply, use PQS, integrate wallets | [LocalNet Deployment Guide](https://github.com/Jatinp26/Canton-Developer-Hub/blob/main/LocalNet%20Deployment%20Guide.md) |
+| Understand LocalNet deeply, use PQS, integrate wallets | [LocalNet Deployment Guide](https://github.com/canton-network-devs/Canton-Developer-Hub/blob/main/LocalNet%20Deployment%20Guide.md) |
 | Build a full Canton app with backend, auth, frontend | [cn-quickstart](https://github.com/digital-asset/cn-quickstart) |
-| Browse all Canton tools, SDKs, and APIs | [Canton Dev Toolings Guide](https://github.com/Jatinp26/Canton-Developer-Hub/blob/main/Canton%20Dev%20Toolings%20Guide.md) |
+| Browse all Canton tools, SDKs, and APIs | [Canton Dev Toolings Guide](https://github.com/canton-network-devs/Canton-Developer-Hub/blob/main/Canton%20Dev%20Toolings%20Guide.md) |
 
-> *Built by [Jatin Pandya](https://x.com/Jpandya26), Developer Relations Manager, Canton Foundation.*
+> *Built by Developer Relations at Canton Foundation.*

@@ -8,3 +8,4 @@ validators.json
 nginx-customs/
 validators/
 last-validator-add-failure-*.log
+.DS_Store
