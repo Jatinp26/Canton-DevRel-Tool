@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-REPO="Jatinp26/Canton-Builder-Tool"
+REPO="canton-network-devs/Canton-Builder-Tool"
 INSTALL_DIR="$HOME/.canton-builder"
 BIN_DIR="$HOME/.local/bin"
 VERSION="0.1.0"

@@ -1,3 +1,4 @@
 .env
 bundle/
 *.tar.gz
+.DS_Store
