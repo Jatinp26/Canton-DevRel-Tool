@@ -91,9 +91,9 @@
   }
   .hero h1 em{color:var(--purple); font-style:normal;}
   .hero p.lead{
-    margin-top:20px; font-size:18px; color:var(--ink-soft); max-width:56ch;
+    margin-top:20px; font-size:15px; color:var(--ink-soft); max-width:56ch;
   }
-  .hero .ctaRow{display:flex; gap:14px; margin-top:32px; flex-wrap:wrap;}
+  .hero .ctaRow{display:flex; gap:13px; margin-top:32px; flex-wrap:wrap;}
   .btn{
     display:inline-flex; align-items:center; gap:8px; padding:13px 22px; border-radius:100px;
     font-size:14px; font-weight:600; border:1px solid transparent; transition:transform .15s ease, background .15s ease, border-color .15s ease;
@@ -135,7 +135,7 @@
   .branch-quote code{font-style:normal;}
   .branch-target{
     display:inline-flex; align-items:center; justify-content:center; gap:6px;
-    font-family:"IBM Plex Mono",monospace; font-size:12.5px; font-weight:600;
+    font-family:"IBM Plex Mono",monospace; font-size:12px; font-weight:600;
     padding:10px 14px; border-radius:8px; text-align:center;
   }
   .branch-target:hover{text-decoration:none; filter:brightness(1.18);}
@@ -167,25 +167,25 @@
   .partHead .partLabel{
     font-family:"IBM Plex Mono",monospace; font-size:12px; text-transform:uppercase; letter-spacing:.08em; color:var(--lilac); font-weight:600;
   }
-  .partHead h2{font-size:40px; margin-top:4px;}
-  .partHead p{color:var(--ink-soft); margin-top:8px; font-size:25px; max-width:60ch;}
+  .partHead h2{font-size:25px; margin-top:4px;}
+  .partHead p{color:var(--ink-soft); margin-top:8px; font-size:18px; max-width:60ch;}
 
   section.step{margin:44px 0;}
   section.step h3{
-    font-size:30px; display:flex; align-items:center; gap:10px; scroll-margin-top:90px; color:var(--white);
+    font-size:17px; display:flex; align-items:center; gap:10px; scroll-margin-top:90px; color:var(--white);
   }
-  section.step h4{font-size:25px; color:var(--white); margin-top:22px; margin-bottom:8px; font-weight:600;}
-  .step p{color:var(--ink-soft); font-size:20.5px;}
-  .step ul, .step ol{color:var(--ink-soft); font-size:20.5px; padding-left:22px;}
+  section.step h4{font-size:16px; color:var(--white); margin-top:22px; margin-bottom:8px; font-weight:600;}
+  .step p{color:var(--ink-soft); font-size:15px;}
+  .step ul, .step ol{color:var(--ink-soft); font-size:15px; padding-left:22px;}
   .step li{margin-bottom:5px;}
   .stepNum{
-    font-family:"IBM Plex Mono",monospace; font-size:16px; color:var(--white); background:var(--purple);
+    font-family:"IBM Plex Mono",monospace; font-size:14px; color:var(--white); background:var(--purple);
     width:22px; height:22px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; flex-shrink:0;
   }
 
   pre{
     background:var(--code-bg); color:#EDE8F5; padding:18px 20px; border-radius:8px; overflow-x:auto;
-    font-size:15px; line-height:1.65; margin:14px 0; border:1px solid var(--code-line);
+    font-size:13px; line-height:1.65; margin:14px 0; border:1px solid var(--code-line);
   }
   pre code{background:none; padding:0; color:inherit; font-size:inherit;}
   code{
@@ -193,7 +193,7 @@
   }
   pre .cm{color:#7A7388;}
 
-  table{width:100%; border-collapse:collapse; margin:16px 0; font-size:14px;}
+  table{width:100%; border-collapse:collapse; margin:18px 0; font-size:14.2px;}
   th{
     text-align:left; background:var(--surface-2); color:var(--white); font-weight:600;
     padding:10px 14px; border-bottom:1px solid var(--line); font-size:15px;
@@ -203,17 +203,17 @@
   td code, th code{white-space:nowrap;}
 
   .callout{
-    display:flex; gap:12px; padding:16px 18px; border-radius:8px; margin:18px 0; font-size:15.5px;
+    display:flex; gap:12px; padding:16px 18px; border-radius:8px; margin:18px 0; font-size:14px;
     border:1px solid var(--line); background:var(--surface);
   }
-  .callout .ic{font-size:15px; flex-shrink:0; margin-top:1px;}
+  .callout .ic{font-size:13px; flex-shrink:0; margin-top:1px;}
   .callout.tip{border-color:var(--purple-dim-2); background:var(--purple-dim);}
   .callout.warn{border-left:3px solid var(--taupe); background:var(--surface-2);}
   .callout strong{color:var(--white);}
 
   .checklist{list-style:none; padding:0; margin:16px 0;}
   .checklist li{
-    display:flex; gap:10px; align-items:flex-start; padding:7px 0; font-size:15px; color:var(--ink-soft);
+    display:flex; gap:10px; align-items:flex-start; padding:7px 0; font-size:13px; color:var(--ink-soft);
     border-bottom:1px dashed var(--line);
   }
   .checklist li:last-child{border-bottom:none;}
@@ -223,12 +223,12 @@
 
   .divider{
     display:flex; align-items:center; gap:14px; margin:64px 0 8px; color:var(--taupe);
-    font-family:"IBM Plex Mono",monospace; font-size:12px; text-transform:uppercase; letter-spacing:.08em;
+    font-family:"IBM Plex Mono",monospace; font-size:10px; text-transform:uppercase; letter-spacing:.08em;
   }
   .divider::before, .divider::after{content:""; height:1px; background:var(--line); flex:1;}
 
   .portTag{
-    display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:12.5px; background:var(--surface-2);
+    display:inline-block; font-family:"IBM Plex Mono",monospace; font-size:11.2px; background:var(--surface-2);
     border:1px solid var(--line); padding:2px 7px; border-radius:5px; color:var(--white);
   }
 
@@ -237,9 +237,9 @@
     padding:48px 32px 32px; margin-top:20px;
   }
   .footInner{max-width:var(--maxw); margin:0 auto; display:flex; justify-content:space-between; align-items:flex-end; gap:24px; flex-wrap:wrap;}
-  .footInner .fw{font-weight:600; font-size:16px; color:var(--white);}
+  .footInner .fw{font-weight:600; font-size:14px; color:var(--white);}
   .footInner .fw .dot{color:var(--purple);}
-  footer p{color:var(--ink-mute); font-size:13.5px; margin:8px 0 0; max-width:44ch;}
+  footer p{color:var(--ink-mute); font-size:13px; margin:8px 0 0; max-width:44ch;}
   footer a{color:var(--lilac);}
   .footLinks{display:flex; gap:22px; font-size:13.5px;}
   .footLinks a{color:var(--ink-soft);}
@@ -371,7 +371,7 @@
         <circle cx="42" cy="42" r="6" fill="none" stroke="#D5A5E3" stroke-width="1.4"/>
       </svg>
       <div>
-        <div class="partLabel">Part 1 — Fast Path</div>
+        <div class="partLabel">Part A</div>
         <h2>Canton Builder Tool</h2>
         <p>One command to run and deploy on a Canton Network LocalNet in your system. Built for anyone who needs a local Canton Network without waiting for DevNet whitelisting giving three validators, wallet UIs, Canton Coin, Scan UI, the whole official Splice LocalNet stack.</p>
       </div>
@@ -438,14 +438,14 @@ canton builder reset                        <span class="cm"># wipe everything, 
 
     <section class="step" id="bt-isisnt">
       <h3>What it is / isn't</h3>
-      <p><strong>Is:</strong> a CLI wrapping the official <a href="https://docs.canton.network/sdks-tools/development-tools/localnet#localnet" target="_blank" rel="noopener">Splice LocalNet</a> — the same Docker Compose configuration Digital Asset ships with every Splice release, invoked with the exact commands from the official docs. No custom compose files, no approximations.</p>
+      <p><strong>Is:</strong> a CLI wrapping the official <a href="https://docs.canton.network/sdks-tools/development-tools/localnet#localnet" target="_blank" rel="noopener">Splice LocalNet</a>: the same Docker Compose configuration Ships with every Splice release, invoked with the exact commands from the official docs. No custom compose files, no approximations.</p>
       <p><strong>Isn't:</strong> a replacement for <a href="https://github.com/digital-asset/cn-quickstart" target="_blank" rel="noopener">cn-quickstart</a>. Quickstart is a full developer project template with a reference app, Java backend, and React frontend. This tool is just the network layer to bring your own Daml project.</p>
     </section>
 
     <section class="step" id="bt-troubleshoot">
       <h3>Troubleshooting</h3>
       <h4>First run is slow</h4>
-      <p>Normal — the Splice bundle and Docker images download on first run. Everything is cached after that.</p>
+      <p>Normal: the Splice bundle and Docker images download on first run. Everything is cached after that.</p>
       <h4>Containers crash on startup</h4>
       <p>Docker memory. Docker Desktop → Settings → Resources → Memory → set to 8 GB minimum.</p>
       <h4>*.localhost domains don't resolve</h4>
@@ -482,23 +482,23 @@ canton builder start</code></pre>
         <line x1="28" y1="28" x2="28" y2="48" stroke="#A89F91" stroke-width="1"/>
       </svg>
       <div>
-        <div class="partLabel">Part 2 — Full Control</div>
+        <div class="partLabel">Part B</div>
         <h2>Deploy your Daml project on Canton LocalNet</h2>
-        <p>You showed up at a hackathon (or a bootcamp). You've written some Daml, built your <code>.dar</code>, and now you're staring at the Canton docs wondering where to even begin. This is the walkthrough that fills that gap — real validators, a real synchronizer, real wallets, no DevNet whitelisting, no waiting. macOS and Linux only; Windows users can use WSL 2.</p>
+        <p>You showed up at a hackathon (or a bootcamp). You've written some Daml, built your <code>.dar</code>, and now you're staring at the Canton docs wondering where to even begin. This is the walkthrough that fills that gap of real validators, a real synchronizer, real wallets, no DevNet whitelisting, no waiting. macOS and Linux only; Windows users can use WSL 2.</p>
       </div>
     </div>
 
     <section class="step" id="qs-model">
       <h3>What you're actually running</h3>
-      <p><strong>Canton LocalNet</strong> is a full Canton Network running in Docker — not a simulation or a trimmed-down sandbox. It's built into the <code>cn-quickstart</code> repository from Digital Asset, which pairs LocalNet with a reference licensing app you'll partially replace with your own project.</p>
+      <p><strong>Canton LocalNet</strong> is a full Canton Network running in Docker. It's built into the <code>cn-quickstart</code> repository from Digital Asset, which pairs LocalNet with a reference licensing app you'll partially replace with your own project.</p>
       <table>
         <tr><th>Role</th><th>What it actually is</th><th>Why you care</th></tr>
         <tr><td><strong>Synchronizer</strong></td><td>Sequences and orders transactions</td><td>Already running inside LocalNet</td></tr>
         <tr><td><strong>Validator</strong></td><td>Runs a participant node + wallet</td><td>LocalNet gives you three of them</td></tr>
-        <tr><td><strong>Party</strong></td><td>A named identity on the ledger — like an address</td><td>Your Daml contracts sit between parties</td></tr>
+        <tr><td><strong>Party</strong></td><td>A named identity on the ledger like an address</td><td>Your Daml contracts sit between parties</td></tr>
       </table>
       <p>LocalNet gives you three validators: <code>app-provider</code>, <code>app-user</code>, and <code>sv</code> (Super Validator). Treat <code>app-provider</code> as your app or company and <code>app-user</code> as a customer; <code>sv</code> runs the infrastructure. For most hackathon projects you'll deploy your DAR to <code>app-provider</code> and have parties on both <code>app-provider</code> and <code>app-user</code> interact as a multi-party workflow.</p>
-      <div class="callout tip"><div><strong>About Keycloak</strong> — it's the authentication/OAuth2 layer in the stack. Enable it during setup (<code>make setup</code> will ask). It's required for the wallet UI and Canton Coin transfers. Just say yes and move on.</div></div>
+      <div class="callout tip"><div><strong>About Keycloak</strong>: it's the authentication/OAuth2 layer in the stack. Enable it during setup (<code>make setup</code> will ask). It's required for the wallet UI and Canton Coin transfers. Just say yes and move on.</div></div>
     </section>
 
     <section class="step" id="qs-prereqs">
@@ -507,18 +507,18 @@ canton builder start</code></pre>
         <li><span class="box"></span>Docker Desktop installed and running (<code>docker info</code> returns something, not an error)</li>
         <li><span class="box"></span>Docker Desktop has <strong>at least 8 GB</strong> of memory allocated (Settings → Resources → Memory)</li>
         <li><span class="box"></span>Git installed</li>
-        <li><span class="box"></span><code>dpm</code> installed and in your PATH — you need it to build your project</li>
+        <li><span class="box"></span><code>dpm</code> installed and in your PATH as you need it to build your project</li>
         <li><span class="box"></span>Your Daml project has a <code>daml.yaml</code> and source files ready</li>
         <li><span class="box"></span>Docker Hub account, and you're logged in via <code>docker login</code></li>
       </ul>
-      <div class="callout warn"><div><strong>Memory is not optional.</strong> Under 8 GB and containers crash mid-startup — what looks like a mystery bug is usually just an OOM kill. Run <code>dpm version</code> first; if it errors, your <code>dpm</code> bin isn't on PATH.</div></div>
+      <div class="callout warn"><div><strong>Memory is not optional.</strong> Under 8 GB and containers crash mid-startup, what looks like a mystery bug is usually just an OOM kill. Run <code>dpm version</code> first; if it errors, your <code>dpm</code> bin isn't on PATH.</div></div>
     </section>
 
     <section class="step" id="qs-step1">
       <h3><span class="stepNum">1</span>Clone cn-quickstart</h3>
       <pre><code>git clone https://github.com/digital-asset/cn-quickstart.git
 cd cn-quickstart</code></pre>
-      <p>Now move into the quickstart directory — this is where you'll live for the rest of the guide:</p>
+      <p>Now move into the quickstart directory, this is where you'll live for the rest of the guide:</p>
       <pre><code>cd quickstart</code></pre>
       <div class="callout tip"><div>Almost everything from here runs from inside <code>quickstart/</code>. The <code>Makefile</code> lives here — if a <code>make</code> command errors with "no Makefile found," you're in the wrong directory.</div></div>
     </section>
@@ -541,8 +541,8 @@ cd cn-quickstart</code></pre>
       <h3><span class="stepNum">3</span>Add your Daml project to the quickstart</h3>
       <p>This is the part nobody explains. Here's how your contracts actually get into LocalNet.</p>
       <h4>3a · Where to put your Daml files</h4>
-      <p>The quickstart's Daml code lives in <code>quickstart/daml/licensing/</code> — the reference licensing app. You have two options.</p>
-      <p><strong>Option A — add alongside the existing app (recommended for hackathons).</strong> Create a new directory for your project inside <code>daml/</code>:</p>
+      <p>The quickstart's Daml code lives in <code>quickstart/daml/licensing/</code>: the reference licensing app. You have two options.</p>
+      <p><strong>Option A: add alongside the existing app (recommended for hackathons).</strong> Create a new directory for your project inside <code>daml/</code>:</p>
       <pre><code><span class="cm">quickstart/
   daml/
     licensing/          ← the existing reference app, leave this alone
@@ -551,10 +551,10 @@ cd cn-quickstart</code></pre>
         YourModule.daml
       daml.yaml</span></code></pre>
       <p>You keep the reference app intact for reference and add your own project as a separate package.</p>
-      <p><strong>Option B — replace the existing app.</strong> Delete the contents of <code>daml/licensing/</code> and drop your project files there, updating paths in the steps below accordingly. Only do this if you're confident you won't need the reference app.</p>
+      <p><strong>Option B: replace the existing app.</strong> Delete the contents of <code>daml/licensing/</code> and drop your project files there, updating paths in the steps below accordingly. Only do this if you're confident you won't need the reference app.</p>
 
       <h4>3b · Set up your daml.yaml</h4>
-      <p>If you built your project with <code>dpm</code>, you already have a <code>daml.yaml</code> — just make sure its SDK version matches the quickstart's.</p>
+      <p>If you built your project with <code>dpm</code>, you already have a <code>daml.yaml</code> just make sure its SDK version matches the quickstart's.</p>
       <pre><code>cat .env | grep DAML_SDK_VERSION</code></pre>
       <pre><code><span class="cm"># daml.yaml</span>
 sdk-version: 3.x.x   <span class="cm"># should match what you just found</span></code></pre>
@@ -569,7 +569,7 @@ sdk-version: 3.x.x   <span class="cm"># should match what you just found</span><
       <pre><code>make build</code></pre>
       <p>Compiles all Daml packages, generates Java bindings for the backend, and builds the frontend. Your compiled DAR lands at:</p>
       <pre><code>quickstart/daml/your-project/.daml/dist/your-project-&lt;version&gt;.dar</code></pre>
-      <div class="callout warn"><div><strong>Build errors?</strong> 99% of the time it's an SDK version mismatch or a missing dependency in your <code>daml.yaml</code>. If your project depends on Splice DARs (Canton Coin interfaces etc.), check <code>daml/dars/</code> — the quickstart bundles them there.</div></div>
+      <div class="callout warn"><div><strong>Build errors?</strong> 99% of the time it's an SDK version mismatch or a missing dependency in your <code>daml.yaml</code>. If your project depends on Splice DARs (Canton Coin interfaces etc.), check <code>daml/dars/</code>: the quickstart bundles them there.</div></div>
     </section>
 
     <section class="step" id="qs-step4">
@@ -579,12 +579,12 @@ sdk-version: 3.x.x   <span class="cm"># should match what you just found</span><
 make capture-logs</code></pre>
       <p>Back in your first terminal:</p>
       <pre><code>make start</code></pre>
-      <p>This spins up the whole Canton Network locally — around five minutes the first time. Once the flood of log output settles, you're up.</p>
+      <p>This spins up the whole Canton Network locally around five minutes the first time. Once the flood of log output settles, you're up.</p>
     </section>
 
     <section class="step" id="qs-step5">
       <h3><span class="stepNum">5</span>Upload your DAR to LocalNet</h3>
-      <p>LocalNet is running, but your contracts aren't on it yet — you need to upload your DAR to the participant nodes that will use it.</p>
+      <p>LocalNet is running, but your contracts aren't on it yet, you need to upload your DAR to the participant nodes that will use it.</p>
       <h4>5a · Get an admin token</h4>
       <p>The JSON API needs an auth token. Grab the App Provider's:</p>
       <pre><code>export PROVIDER_ADMIN_TOKEN=$(curl -fsS \
@@ -596,7 +596,7 @@ make capture-logs</code></pre>
   -d 'scope=openid' | jq -r .access_token)
 
 echo $PROVIDER_ADMIN_TOKEN   <span class="cm"># should print a long JWT string, not empty</span></code></pre>
-      <div class="callout warn"><div><strong>Token expired?</strong> Just re-run the command for a fresh one. A "Cannot iterate over null" error from <code>jq</code> usually means Keycloak is still starting — wait a minute and retry.</div></div>
+      <div class="callout warn"><div><strong>Token expired?</strong> Just re-run the command for a fresh one. A "Cannot iterate over null" error from <code>jq</code> usually means Keycloak is still starting wait a minute and retry.</div></div>
 
       <h4>5b · Upload your DAR</h4>
       <pre><code><span class="cm"># Replace the path with your actual DAR file path</span>
@@ -622,7 +622,7 @@ curl -X POST http://localhost:2975/v2/packages \
       <h4>5c · Get your package ID</h4>
       <p>You'll need this to create contracts via the API:</p>
       <pre><code>dpm damlc inspect-dar ./daml/your-project/.daml/dist/your-project-0.0.1.dar</code></pre>
-      <p>Find the line with your project name and no <code>-dalf</code> extension — it looks like <code>your-project-0.0.1-&lt;64-char-hex-string&gt;</code>. That hex string is your package ID:</p>
+      <p>Find the line with your project name and no <code>-dalf</code> extension, it looks like <code>your-project-0.0.1-&lt;64-char-hex-string&gt;</code>. That hex string is your package ID:</p>
       <pre><code>export PACKAGE_ID=$(dpm damlc inspect-dar ./daml/your-project/.daml/dist/your-project-0.0.1.dar \
   | grep "your-project-0.0.1-" | grep -v "dalf" | tail -1 | awk '{print $2}' | tr -d '"')
 echo $PACKAGE_ID</code></pre>
@@ -646,7 +646,7 @@ echo "User: $APP_USER_PARTY"</code></pre>
 
     <section class="step" id="qs-step7">
       <h3><span class="stepNum">7</span>Create a contract</h3>
-      <p>Now the good part — creating a contract on LocalNet via the JSON Ledger API. This example assumes a template like:</p>
+      <p>Now the good part of creating a contract on LocalNet via the JSON Ledger API. This example assumes a template like:</p>
       <pre><code>template MyContract
   with
     provider : Party
@@ -687,14 +687,14 @@ echo "User: $APP_USER_PARTY"</code></pre>
       </ul>
       <p>Log in with <code>app-user</code> / <code>abc123</code> or <code>app-provider</code> / <code>abc123</code>. If those show invalid, log into the main admin Keycloak (<code>admin</code> / <code>admin</code>) and set a new password from the Users tab.</p>
       <h4>Tap CC (App User)</h4>
-      <p>Find the <strong>Tap</strong> button, add an amount in USD (say, 500) — it shows up in the balance almost immediately, converted into CC.</p>
+      <p>Find the <strong>Tap</strong> button, add an amount in USD (say, 500), it shows up in the balance almost immediately, converted into CC.</p>
       <h4>Send CC between parties</h4>
-      <p>In the App User wallet: click <strong>Send</strong> → paste the App Provider's party ID from Step 6 → enter an amount → confirm. The transfer appears in both wallets — real Canton Coin mechanics, privacy-preserving, mediated by the local synchronizer.</p>
+      <p>In the App User wallet: click <strong>Send</strong> → paste the App Provider's party ID from Step 6 → enter an amount → confirm. The transfer appears in both wallets real Canton Coin mechanics, privacy preserving, mediated by the local synchronizer.</p>
     </section>
 
     <section class="step" id="qs-step9">
       <h3><span class="stepNum">9</span>Interact via Daml Shell</h3>
-      <p>A REPL for your LocalNet — great for exercising choices interactively without writing curl commands.</p>
+      <p>A REPL for your LocalNet great for exercising choices interactively without writing curl commands.</p>
       <pre><code>make shell</code></pre>
       <p>You'll drop into an interactive shell connected to the App Provider's participant, where you can query active contracts, exercise choices, and inspect ledger state.</p>
       <pre><code>daml&gt; import DA.List
@@ -703,17 +703,17 @@ daml&gt; <span class="cm">-- your Daml expressions here</span></code></pre>
 
     <section class="step" id="qs-reset">
       <h3>Resetting and starting clean</h3>
-      <p>Things will break. That's fine — here's how to wipe and start fresh:</p>
+      <p>Things will break. That's fine here's how to wipe and start fresh:</p>
       <pre><code>make stop           <span class="cm"># stop all containers</span>
 make clean-all       <span class="cm"># remove data, volumes, everything</span>
 make build           <span class="cm"># rebuild</span>
 make start            <span class="cm"># start fresh</span></code></pre>
-      <div class="callout warn"><div><code>make clean-all</code> nukes all LocalNet ledger data, party registrations, and CC balances — a full reset. Use it whenever you hit a weird state you can't debug.</div></div>
+      <div class="callout warn"><div><code>make clean-all</code> nukes all LocalNet ledger data, party registrations, and CC balances, a full reset. Use it whenever you hit a weird state you can't debug.</div></div>
     </section>
 
     <section class="step" id="qs-ports">
       <h3>Port reference</h3>
-      <p>Bookmark this — you'll refer to it constantly.</p>
+      <p>Bookmark this as you'll refer to it constantly.</p>
       <table>
         <tr><th>Service</th><th>URL / Port</th><th>What it is</th></tr>
         <tr><td>App User JSON API</td><td><span class="portTag">localhost:2975</span></td><td>Submit commands, query as App User</td></tr>
@@ -732,11 +732,11 @@ make start            <span class="cm"># start fresh</span></code></pre>
       <h3>Common issues</h3>
       <table>
         <tr><th>Symptom</th><th>Fix</th></tr>
-        <tr><td>"Container failed to start"</td><td>Almost always a memory issue — 8 GB minimum, 12 GB if you can spare it</td></tr>
-        <tr><td>"401 Unauthorized" on API calls</td><td>Token expired — re-run the token export from Step 5a</td></tr>
-        <tr><td>"Empty reply from server" on DAR upload</td><td>Participant isn't ready yet — wait 30 seconds and retry</td></tr>
-        <tr><td>"409 Conflict" on DAR upload</td><td>You already uploaded that DAR — it's idempotent, the package is already there</td></tr>
-        <tr><td>Wallet UI blank / can't log in</td><td>Keycloak still starting — wait, refresh, or <code>make stop && make clean-all && make start</code></td></tr>
+        <tr><td>"Container failed to start"</td><td>Almost always a memory issue: 8 GB minimum, 12 GB if you can spare it</td></tr>
+        <tr><td>"401 Unauthorized" on API calls</td><td>Token expired: re-run the token export from Step 5a</td></tr>
+        <tr><td>"Empty reply from server" on DAR upload</td><td>Participant isn't ready yet: wait 30 seconds and retry</td></tr>
+        <tr><td>"409 Conflict" on DAR upload</td><td>You already uploaded that DAR: it's idempotent, the package is already there</td></tr>
+        <tr><td>Wallet UI blank / can't log in</td><td>Keycloak still starting: wait, refresh, or <code>make stop && make clean-all && make start</code></td></tr>
         <tr><td><code>make build</code> fails with SDK mismatch</td><td>Match your <code>daml.yaml</code> SDK version to <code>DAML_SDK_VERSION</code> in the quickstart's <code>.env</code></td></tr>
       </table>
       <h4>Quick reference: the commands you'll use most</h4>
