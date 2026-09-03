@@ -27,6 +27,16 @@ fi
 
 BUNDLE_DIR="${BUNDLE_DIR:-$HOME/.canton-builder/bundle}"
 LOCALNET_DIR="$BUNDLE_DIR/splice-node/docker-compose/localnet"
+VALIDATOR_BUNDLE_DIR="$BUNDLE_DIR/splice-node/docker-compose/validator"
+
+REPO_DIR="${REPO_DIR:-$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)}"
+# Export OVERLAYS_DIR so docker compose can interpolate it inside overlay YAMLs
+# (volume source paths). Without export, child processes see it as unset and
+# silently produce empty interpolations.
+export OVERLAYS_DIR="$REPO_DIR/overlays"
+
+CANTON_DEVREL_DIR="${CANTON_DEVREL_DIR:-$HOME/.canton-builder}"
+
 COMPOSE_CMD=(
   docker compose
   --env-file "$LOCALNET_DIR/compose.env"

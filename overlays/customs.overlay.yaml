@@ -1,0 +1,17 @@
+# Overlay applied to the localnet compose project.
+# - Mounts a patched nginx.conf that also globs the customs/ subdir (the bundle's
+#   nginx.conf only includes /etc/nginx/conf.d/*.conf at the top level, so per-
+#   custom server blocks rendered into customs/ would otherwise be invisible).
+# - Surfaces ~/.canton-builder/nginx-customs/*.conf inside nginx at
+#   /etc/nginx/conf.d/customs/ so wallet.<name>.localhost:5500 can be served.
+# - Exposes nginx on :5500 to host. Port 5500 is chosen over the more obvious
+#   5000 because macOS Monterey+ binds 5000 to AirPlay Receiver by default,
+#   which silently intercepts the connection and returns 403 with an
+#   `AirTunes/*` Server header — confusing to debug.
+services:
+  nginx:
+    ports:
+      - "${HOST_BIND_IP:-127.0.0.1}:5500:5500"
+    volumes:
+      - ${OVERLAYS_DIR}/nginx-conf/nginx.conf:/etc/nginx/nginx.conf:ro
+      - ${CANTON_DEVREL_DIR}/nginx-customs:/etc/nginx/conf.d/customs:ro

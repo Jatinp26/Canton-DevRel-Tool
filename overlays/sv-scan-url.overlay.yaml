@@ -1,0 +1,13 @@
+# Mounts a patched SV app.conf over the bundle's so the SV registers
+# http://splice:5012 (Docker DNS) as its scan.internal-url in DsoRules
+# instead of http://localhost:5012. Without this, peer validators on the
+# shared `localnet` network can't reach the SV's scan service after the
+# BftScanConnection refreshes its list from DsoRules.
+services:
+  splice:
+    volumes:
+      # Use absolute path via OVERLAYS_DIR (exported by common.sh). Docker compose
+      # resolves relative volume paths against the first -f file's directory
+      # (the bundle's compose.yaml), not this overlay's directory — relative
+      # paths here would point inside the bundle and fail.
+      - ${OVERLAYS_DIR}/splice-conf/sv-app.conf:/app/sv/${SV_PROFILE}/app.conf:ro

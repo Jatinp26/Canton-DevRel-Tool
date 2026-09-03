@@ -1,4 +1,11 @@
 .env
 bundle/
 *.tar.gz
+docs/
+tests/.bats/
+validators.json
+.registry.lock
+nginx-customs/
+validators/
+last-validator-add-failure-*.log
 .DS_Store

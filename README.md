@@ -59,6 +59,58 @@ canton builder reset                        # wipe everything, start clean
 | SV Ledger API (gRPC) | localhost:4901 | - |
 | PostgreSQL | localhost:5432 | - |
 
+## Validators
+
+The default `canton builder start` brings up SV + `app-provider`. You can boot a subset, a superset, or add custom validators on top.
+
+### Boot-time flags
+
+```bash
+canton builder start                                    # SV + app-provider
+canton builder start --validators app-provider          # absolute set
+canton builder start --only app-provider                # alias for --validators
+canton builder start --with app-user                    # additive
+canton builder start --without app-provider             # subtractive
+canton builder start --with app-user --without app-provider
+```
+
+`sv` is infrastructure and is always on — passing it explicitly is an error.
+
+### Manage validators at runtime
+
+```bash
+canton builder validator list                  # show all validators + health
+canton builder validator info acme             # ports, wallet URL, party hint
+canton builder validator add acme              # register + start a custom validator
+canton builder validator add bob --port-base 7900
+canton builder validator stop acme             # stop, keep data
+canton builder validator start acme            # bring back with existing ledger
+canton builder validator rm acme               # full delete (data + recipe)
+```
+
+Each custom validator joins the same local SV. Wallet UI is served via the localnet nginx on `:5500`:
+
+- `http://wallet.acme.localhost:5500`  — wallet UI
+- `http://localhost:5975`               — JSON ledger API (port_base + 75)
+- `http://localhost:5903/api/validator/readyz`  — health probe
+
+### Default validators
+
+Persist your preferred default set at `~/.canton-builder/.env`:
+```bash
+DEFAULT_VALIDATORS=app-provider,app-user,acme
+```
+Used by `canton builder start` when no flags are passed and no validators are currently registered as running.
+
+### Reset
+
+```bash
+canton builder reset           # wipe ledger data, keep validator recipes
+canton builder reset --purge   # also wipe ~/.canton-builder (factory reset)
+```
+
+---
+
 ## First Run
 
 On `canton builder start`, the tool:

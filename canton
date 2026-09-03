@@ -18,6 +18,7 @@ usage() {
     deploy <file.dar>   Upload a prebuilt DAR to App Provider + App User participants
     logs [service]      Tail container logs (optionally filter to one service)
     reset               Wipe all data and stop containers, full clean slate
+    validator <verb>    Manage validators (list, add, start, stop, rm, info)
     version             Print version info
 
   EXAMPLES
@@ -40,6 +41,7 @@ usage() {
     App User JSON API      →  http://localhost:2975
     App Provider Wallet    →  http://wallet.localhost:3000
     App User Wallet        →  http://wallet.localhost:2000
+    Custom Wallets         →  http://wallet.<name>.localhost:5500
     Scan UI                →  http://scan.localhost:4000
     Keycloak               →  http://keycloak.localhost:8082
 
@@ -64,13 +66,16 @@ fi
 
 case "$DEVREL_COMMAND" in
   start)
-    exec "$CANTON_DEVREL_DIR/scripts/start.sh"
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/start.sh" "$@"
     ;;
   stop)
-    exec "$CANTON_DEVREL_DIR/scripts/stop.sh"
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/stop.sh" "$@"
     ;;
   status)
-    exec "$CANTON_DEVREL_DIR/scripts/status.sh"
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/status.sh" "$@"
     ;;
   deploy)
     shift 2
@@ -81,7 +86,12 @@ case "$DEVREL_COMMAND" in
     exec "$CANTON_DEVREL_DIR/scripts/logs.sh" "${@:-}"
     ;;
   reset)
-    exec "$CANTON_DEVREL_DIR/scripts/reset.sh"
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/reset.sh" "$@"
+    ;;
+  validator)
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/validator.sh" "$@"
     ;;
   version|--version|-v)
     echo "canton builder v${VERSION}"

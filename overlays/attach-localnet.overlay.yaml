@@ -1,0 +1,40 @@
+# Overlay applied to every per-custom validator-<name> project.
+# Attaches the validator to the shared 'localnet' network created by the
+# localnet stack, and removes the per-project nginx host binding (UI is
+# served via localnet's nginx on :5500 with wallet.<name>.localhost).
+networks:
+  localnet:
+    external: true
+
+services:
+  participant:
+    networks:
+      - splice_validator
+      - localnet
+    # Bind gRPC + JSON ledger APIs to per-validator host ports so user scripts
+    # and `validator_info`'s advertised URLs work. Container ports match the
+    # bundle's validator participant config (5001 gRPC, 7575 JSON ledger).
+    ports:
+      - "${LEDGER_API_PORT}:5001"
+      - "${JSON_API_PORT}:7575"
+  validator:
+    networks:
+      - splice_validator
+      - localnet
+    # Bind /api/validator on the host so readyz and SDK clients can reach it.
+    # The bundle's per-validator nginx is unbound below (avoid :80 collisions
+    # across multiple validator-<name> projects), so without this the validator
+    # backend would be reachable only from inside the splice_validator network.
+    ports:
+      - "${VALIDATOR_API_PORT}:5003"
+  wallet-web-ui:
+    networks:
+      - splice_validator
+      - localnet
+  ans-web-ui:
+    networks:
+      - splice_validator
+      - localnet
+  nginx:
+    # !reset overrides the base sequence rather than appending — Compose merge semantics.
+    ports: !reset []
