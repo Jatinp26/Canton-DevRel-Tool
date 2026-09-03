@@ -2,7 +2,7 @@
 
 set -euo pipefail
 CANTON_DEVREL_DIR="${CANTON_DEVREL_DIR:-${CANTON_BUILDER_DIR:-$HOME/.canton-builder}}"
-VERSION="0.2.0"
+VERSION="2.0.0"
 
 usage() {
   cat <<EOF
