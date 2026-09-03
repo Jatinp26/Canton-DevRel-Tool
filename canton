@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 
 set -euo pipefail
-CANTON_DEVREL_DIR="${CANTON_DEVREL_DIR:-$HOME/.canton-builder}"
-VERSION="0.1.0"
+CANTON_DEVREL_DIR="${CANTON_DEVREL_DIR:-${CANTON_BUILDER_DIR:-$HOME/.canton-builder}}"
+VERSION="0.2.0"
 
 usage() {
   cat <<EOF
@@ -12,18 +12,30 @@ usage() {
     canton builder <command> [args]
 
   COMMANDS
-    start               Boot the full Canton LocalNet (validators, wallets, Keycloak, PQS)
+    start [flags]       Boot Canton LocalNet (participants, wallets, scan, onboarding)
     stop                Stop all LocalNet containers (data preserved)
     status              Show health and port reference for all services
+    env                 Print parties, credentials, API URLs, and tokens for the running net
+    token [--validator <n>]
+                        Print a bearer token for a participant's Ledger API
     deploy <file.dar>   Upload a prebuilt DAR to App Provider + App User participants
     logs [service]      Tail container logs (optionally filter to one service)
     reset               Wipe all data and stop containers, full clean slate
     validator <verb>    Manage validators (list, add, start, stop, rm, info)
     version             Print version info
 
+  START FLAGS
+    --auth              Enable Keycloak (OAuth2 / OIDC client-credentials)
+    --pqs               Enable Participant Query Store (PQS)
+    --with <name>       Add a validator to the active set (e.g. app-user)
+    --without <name>    Remove a validator from the active set
+    --only <list>       Absolute active set (comma-separated)
+
   EXAMPLES
     canton builder start
-    canton builder status
+    canton builder start --auth --with app-user
+    canton builder env
+    canton builder token --validator app-provider
     canton builder deploy ./my-app/.daml/dist/my-app-0.0.1.dar
     canton builder logs splice
     canton builder reset
@@ -32,7 +44,8 @@ usage() {
     canton              Canton participant node
     splice              Splice validators + wallet UIs
     postgres            PostgreSQL
-    keycloak            Keycloak OAuth2
+    keycloak            Keycloak OAuth2            (only with --auth)
+    pqs-app-provider    Participant Query Store    (only with --pqs)
     json-api-app-provider
     json-api-app-user
 
@@ -41,11 +54,15 @@ usage() {
     App User JSON API      →  http://localhost:2975
     App Provider Wallet    →  http://wallet.localhost:3000
     App User Wallet        →  http://wallet.localhost:2000
-    Custom Wallets         →  http://wallet.<name>.localhost:5500
     Scan UI                →  http://scan.localhost:4000
-    Keycloak               →  http://keycloak.localhost:8082
+    SV UI                  →  http://sv.localhost:4000
+    Keycloak               →  http://keycloak.localhost:8082   (only with --auth)
 
-  Wallet login: app-user / abc123  |  app-provider / abc123
+  AUTH
+    Default: self-signed HS256 tokens (mint one with 'canton builder token').
+    With --auth: Keycloak issues OAuth2 tokens; realms AppProvider / AppUser,
+    admin console at http://keycloak.localhost:8082 (admin / admin).
+    Wallet UI logins: app-user / app-provider.
 
 EOF
 }
@@ -56,7 +73,7 @@ if [[ "${1:-}" == "version" || "${1:-}" == "--version" || "${1:-}" == "-v" ]]; t
 fi
 
 SUBCOMMAND="${1:-}"
-DEVREL_COMMAND="${2:-}"
+BUILDER_COMMAND="${2:-}"
 if [[ "$SUBCOMMAND" != "builder" ]]; then
   echo ""
   echo "  Unknown command: ${SUBCOMMAND}"
@@ -64,7 +81,7 @@ if [[ "$SUBCOMMAND" != "builder" ]]; then
   exit 1
 fi
 
-case "$DEVREL_COMMAND" in
+case "$BUILDER_COMMAND" in
   start)
     shift 2
     exec "$CANTON_DEVREL_DIR/scripts/start.sh" "$@"
@@ -76,6 +93,14 @@ case "$DEVREL_COMMAND" in
   status)
     shift 2
     exec "$CANTON_DEVREL_DIR/scripts/status.sh" "$@"
+    ;;
+  env)
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/env.sh" "$@"
+    ;;
+  token)
+    shift 2
+    exec "$CANTON_DEVREL_DIR/scripts/token.sh" "$@"
     ;;
   deploy)
     shift 2
@@ -101,7 +126,7 @@ case "$DEVREL_COMMAND" in
     ;;
   *)
     echo ""
-    echo "  Unknown builder command: $DEVREL_COMMAND"
+    echo "  Unknown builder command: $BUILDER_COMMAND"
     usage
     exit 1
     ;;

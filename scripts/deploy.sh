@@ -87,34 +87,12 @@ for target in "${TARGETS[@]}"; do
 done
 print_ok "Validators reachable"
 
-BUNDLE_COMMON_ENV="$LOCALNET_DIR/env/common.env"
-SECRET="unsafe"
-if [ -f "$BUNDLE_COMMON_ENV" ]; then
-  PARSED=$(grep 'SPLICE_APP_UI_UNSAFE_SECRET' "$BUNDLE_COMMON_ENV" | \
-    sed 's/.*:-\(.*\)}/\1/' | tr -d '"' | tr -d "'" | tr -d ' ')
-  [ -n "$PARSED" ] && SECRET="$PARSED"
+print_step "Generating access token ($(auth_mode))..."
+PROVIDER_TOKEN=$(ledger_token app-provider) || { print_error "Could not obtain an access token."; exit 1; }
+if [ -z "$PROVIDER_TOKEN" ] || [ "$PROVIDER_TOKEN" = "null" ]; then
+  print_error "Empty access token. In OAuth mode, is Keycloak up? Try: canton builder logs keycloak"
+  exit 1
 fi
-
-b64url() {
-  printf '%s' "$1" | base64 | tr '+/' '-_' | tr -d '=' | tr -d '\n'
-}
-make_jwt() {
-  local user="$1"
-  local audience="$2"
-  local exp
-  exp=$(( $(date +%s) + 86400 ))  
-  local header
-  header=$(b64url '{"alg":"HS256","typ":"JWT"}')
-  local payload
-  payload=$(b64url "{\"sub\":\"${user}\",\"aud\":\"${audience}\",\"exp\":${exp}}")
-  local signing_input="${header}.${payload}"
-  local sig
-  sig=$(printf '%s' "$signing_input" | openssl dgst -sha256 -hmac "$SECRET" -binary | \
-    base64 | tr '+/' '-_' | tr -d '=' | tr -d '\n')
-  printf '%s' "${signing_input}.${sig}"
-}
-print_step "Generating JWT token (HS256, secret: ${SECRET})..."
-PROVIDER_TOKEN=$(make_jwt "ledger-api-user" "https://canton.network.global")
 print_ok "Token generated"
 
 upload_dar() {

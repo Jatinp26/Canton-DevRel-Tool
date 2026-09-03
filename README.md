@@ -2,7 +2,7 @@
 
 **One command. Full Canton Network on your laptop.**
 
-Built for hackathons, bootcamps, and anyone who needs a local Canton Network without waiting for DevNet whitelisting. Three validators, a synchronizer, wallet UIs, Canton Coin, Scan UI, the whole official Splice LocalNet stack.
+Built for builders who needs a local Canton Network without waiting for DevNet whitelisting. Three validators, a synchronizer, wallet UIs, Canton Coin, Scan UI plus optional Keycloak (OAuth2) and PQS assembled from the LocalNet compose modules in [cn-quickstart](https://github.com/digital-asset/cn-quickstart).
 
 ## Install
 
@@ -28,19 +28,38 @@ The installer handles PATH setup and `/etc/hosts` entries for `*.localhost` doma
 ## Commands
 
 ```bash
-canton builder start                        # download bundle + boot LocalNet
+# boot LocalNet
+canton builder start                
 
-canton builder stop                         # stop containers (data preserved)
+# boot with Keycloak (OAuth2 / OIDC)
+canton builder start --auth   
 
-canton builder status                       # health check + port reference
+# boot with Participant Query Store
+canton builder start --pqs       
 
-canton builder deploy ./my-app-0.0.1.dar    # upload your DAR to both participants
+# stop containers (data preserved)
+canton builder stop                
 
-canton builder logs                         # tail all logs
+# health check + port reference
+canton builder status       
 
-canton builder logs <service>               # tail one service
+# parties, tokens, API URLs, credentials
+canton builder env                     
 
-canton builder reset                        # wipe everything, start clean
+# print a bearer token
+canton builder token --validator app-provider   
+
+# upload your DAR to both participant local validators
+canton builder deploy ./my-app-0.0.1.dar    
+
+# tail all logs
+canton builder logs                       
+
+# tail one service
+canton builder logs <service>            
+
+# wipe everything, start clean
+canton builder reset                        
 ```
 
 ## What Starts
@@ -57,7 +76,33 @@ canton builder reset                        # wipe everything, start clean
 | App Provider Ledger API (gRPC) | localhost:3901 | - |
 | App User Ledger API (gRPC) | localhost:2901 | - |
 | SV Ledger API (gRPC) | localhost:4901 | - |
+| Keycloak *(with `--auth`)* | http://keycloak.localhost:8082 | admin / admin |
 | PostgreSQL | localhost:5432 | - |
+
+## Authentication
+
+By default LocalNet uses **self-signed HS256 tokens**, a shared `unsafe` secret, no identity provider. The tool mints tokens for you and `deploy` handles auth automatically, so most local development needs nothing more. This is the fastest path.
+
+Need to test a real OAuth2 / OIDC flow, say your SDK does a client-credentials grant against an issuer? Add `--auth`:
+
+This layers in Keycloak:
+
+- **Admin console:** http://keycloak.localhost:8082 (admin / admin)
+- **Realms:** `AppProvider`, `AppUser`
+- **Grant:** `client_credentials`
+- **Token endpoint:** `http://keycloak.localhost:8082/realms/{AppProvider,AppUser}/protocol/openid-connect/token`
+
+Pull everything you need i.e. client IDs/secrets, token URLs, party IDs, and a ready-to-use token with one command:
+
+```bash
+canton builder env
+```
+
+`canton builder token` and `canton builder env` are mode-aware: in the default mode they mint self-signed tokens, with `--auth` they fetch real tokens from Keycloak.
+
+## Participant Query Store (PQS)
+
+Add `--pqs` to run Scribe against the participants, giving you a queryable PostgreSQL projection of the ledger.
 
 ## Validators
 
@@ -67,32 +112,47 @@ The default `canton builder start` brings up SV + `app-provider`. You can boot a
 
 ```bash
 canton builder start                                    # SV + app-provider
-canton builder start --validators app-provider          # absolute set
-canton builder start --only app-provider                # alias for --validators
-canton builder start --with app-user                    # additive
-canton builder start --without app-provider             # subtractive
-canton builder start --with app-user --without app-provider
-```
 
-`sv` is infrastructure and is always on — passing it explicitly is an error.
+canton builder start --validators app-provider          # absolute set
+
+canton builder start --only app-provider                # alias for --validators
+
+canton builder start --with app-user                    # additive
+
+canton builder start --without app-provider             # subtractive
+
+canton builder start --auth --pqs --with app-user       # flags compose
+```
 
 ### Manage validators at runtime
 
 ```bash
-canton builder validator list                  # show all validators + health
-canton builder validator info acme             # ports, wallet URL, party hint
-canton builder validator add acme              # register + start a custom validator
+canton builder validator list                  
+# show all validators + health
+
+canton builder validator info acme             
+# ports, wallet URL, party hint
+
+canton builder validator add acme              
+# register + start a custom validator
+
 canton builder validator add bob --port-base 7900
-canton builder validator stop acme             # stop, keep data
-canton builder validator start acme            # bring back with existing ledger
-canton builder validator rm acme               # full delete (data + recipe)
+
+canton builder validator stop acme             
+# stop, keep data
+
+canton builder validator start acme            
+# bring back with existing ledger
+
+canton builder validator rm acme               
+# full delete (data + recipe)
 ```
 
 Each custom validator joins the same local SV. Wallet UI is served via the localnet nginx on `:5500`:
 
-- `http://wallet.acme.localhost:5500`  — wallet UI
-- `http://localhost:5975`               — JSON ledger API (port_base + 75)
-- `http://localhost:5903/api/validator/readyz`  — health probe
+- `http://wallet.acme.localhost:5500`   wallet UI
+- `http://localhost:5975`               JSON ledger API (port_base + 75)
+- `http://localhost:5903/api/validator/readyz`  health probe
 
 ### Default validators
 
@@ -105,21 +165,12 @@ Used by `canton builder start` when no flags are passed and no validators are cu
 ### Reset
 
 ```bash
-canton builder reset           # wipe ledger data, keep validator recipes
-canton builder reset --purge   # also wipe ~/.canton-builder (factory reset)
+canton builder reset           
+# wipe ledger data, keep validator recipes
+
+canton builder reset --purge   
+# also wipe ~/.canton-builder (factory reset)
 ```
-
----
-
-## First Run
-
-On `canton builder start`, the tool:
-
-1. Downloads the official Splice LocalNet bundle from the Splice GitHub release (One-time only cached at `~/.canton-builder/bundle/`)
-2. Pulls the Canton/Splice Docker images (~5 min, also cached)
-3. Boots the full network using the official LocalNet compose configuration
-
-Subsequent runs skip steps 1 and 2 entirely and boot in ~30 seconds.
 
 ## Deploying Your DAR
 
@@ -129,77 +180,16 @@ Build your Daml project with `dpm build`, then:
 canton builder deploy ./your-project/.daml/dist/your-project-0.0.1.dar
 ```
 
-Uploads your DAR to both the App Provider and App User participants, retrieves your package ID, and prints the template ID format for API calls.
+Uploads your DAR to both the App Provider and App User participants, retrieves your package ID, and prints the template ID format for API calls. Works in both auth modes, the access token is obtained automatically for whichever mode you started in.
 
 ## Interacting With Your Contracts
 
-Once deployed, use the JSON Ledger API to create contracts, exercise choices, and query state.
+Once deployed, use the JSON Ledger API to create contracts, exercise choices, and query state. Grab a token with `canton builder token` (or the full picture with `canton builder env`) and point your calls at the participant's JSON API port from the table above.
 
 ## What It Is / Isn't
 
-**Is:** A CLI that has the official [Splice LocalNet](https://docs.sync.global/app_dev/testing/localnet.html), the same Docker Compose configuration that Digital Asset ships with every Splice release, invoked with the exact commands from the official docs. No custom compose files, no approximations.
+**Is:** A thin CLI over the official LocalNet compose modules from [cn-quickstart](https://github.com/digital-asset/cn-quickstart)'s reference project, pinned to a known-good version. It assembles the same modules cn-quickstart's Makefile does (`localnet`, `splice-onboarding`, and optionally `keycloak` and `pqs`) and drives them with plain `docker compose`. No custom compose files, no approximations.
 
-**Isn't:** A replacement for [cn-quickstart](https://github.com/digital-asset/cn-quickstart). Quickstart is a full developer project template with a reference app, Java backend, and React frontend. This tool is just the network layer to bring your own Daml project.
-
-## Troubleshooting
-
-**First run is slow**
-Normal, the Splice bundle and Docker images download on first run. Everything is cached after that.
-
-**Containers crash on startup**
-Docker memory. Go to Docker Desktop Settings, Under Resources goto Memory and set to 8 GB minimum.
-
-**`*.localhost` domains don't resolve**
-
-```bash
-echo "127.0.0.1  wallet.localhost scan.localhost sv.localhost" | sudo tee -a /etc/hosts
-```
-
-**Weird state / things not working**
-
-```bash
-canton builder reset
-canton builder start
-```
-
-**See what's failing**
-
-```bash
-canton builder logs
-canton builder logs canton     
-canton builder logs splice     
-```
-
-**Re-download the bundle** (if corrupted or upgrading)
-
-```bash
-rm -rf ~/.canton-builder/bundle
-canton builder start
-```
-
-## Upgrading LocalNet version
-
-Edit `~/.canton-builder/.env` and change `IMAGE_TAG`:
-
-```bash
-IMAGE_TAG=0.5.11 
-```
-
-Then reset and restart:
-```bash
-canton builder reset
-rm -rf ~/.canton-builder/bundle  
-canton builder start
-```
-
-# Part of the Canton Developer Hub
-
-This is the fast start layer of the BuidL Experience on Canton.
-
-| Want more? | Where to go |
-|---|---|
-| Understand LocalNet deeply, use PQS, integrate wallets | [LocalNet Deployment Guide](https://github.com/canton-network-devs/Canton-Developer-Hub/blob/main/LocalNet%20Deployment%20Guide.md) |
-| Build a full Canton app with backend, auth, frontend | [cn-quickstart](https://github.com/digital-asset/cn-quickstart) |
-| Browse all Canton tools, SDKs, and APIs | [Canton Dev Toolings Guide](https://github.com/canton-network-devs/Canton-Developer-Hub/blob/main/Canton%20Dev%20Toolings%20Guide.md) |
+**Isn't:** A replacement for cn-quickstart. Quickstart is a full developer project template with a reference app, Java backend, and React frontend. This tool is just the network layer, bring your own Daml project. |
 
 > *Built by Developer Relations at Canton Foundation.*

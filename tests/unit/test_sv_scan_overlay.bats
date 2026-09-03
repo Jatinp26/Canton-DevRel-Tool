@@ -42,6 +42,7 @@ setup() {
 }
 
 @test "infra_compose_argv includes the sv-scan-url overlay" {
+  skip "obsolete after cn-quickstart module migration: the localnet module registers the SV scan URL natively, so infra no longer injects sv-scan-url.overlay.yaml. Overlay retained for the (deferred) custom-validator path."
   source "$REPO_DIR/scripts/lib/common.sh"
   source "$REPO_DIR/scripts/lib/compose.sh"
   mapfile -t argv < <(infra_compose_argv)

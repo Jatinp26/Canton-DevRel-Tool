@@ -6,13 +6,16 @@ source "$DEVREL_DIR/scripts/lib/common.sh"
 source "$DEVREL_DIR/scripts/lib/registry.sh"
 source "$DEVREL_DIR/scripts/lib/resolve.sh"
 source "$DEVREL_DIR/scripts/lib/compose.sh"
+source "$DEVREL_DIR/scripts/lib/modules.sh"
 
-ABSOLUTE="" WITH="" WITHOUT=""
+ABSOLUTE="" WITH="" WITHOUT="" WANT_AUTH=0 WANT_PQS=0
 while [ $# -gt 0 ]; do
   case "$1" in
     --validators|--only) ABSOLUTE="$2"; shift 2 ;;
     --with)              WITH="$2"; shift 2 ;;
     --without)           WITHOUT="$2"; shift 2 ;;
+    --auth)              WANT_AUTH=1; shift ;;
+    --pqs)               WANT_PQS=1; shift ;;
     *) print_error "unknown flag: $1"; exit 1 ;;
   esac
 done
@@ -25,8 +28,19 @@ RESOLVE_ARGS=()
 RESOLVED=$(resolve_active_set "${RESOLVE_ARGS[@]}") || exit 1
 eval "$(echo "$RESOLVED" | sed 's/^/export /')"
 
+export AUTH_MODE=$( [ "$WANT_AUTH" = "1" ] && echo oauth2 || echo none )
+export PQS_ENABLED=$( [ "$WANT_PQS" = "1" ] && echo on || echo off )
+{
+  echo "AUTH_MODE=$AUTH_MODE"
+  echo "PQS_ENABLED=$PQS_ENABLED"
+} > "$CANTON_DEVREL_DIR/.mode"
+
 print_header "Canton Builder Tool Starting LocalNet"
 print_step "Active set: SV(on) APP_PROVIDER($APP_PROVIDER_PROFILE) APP_USER($APP_USER_PROFILE) CUSTOMS(${CUSTOMS:-none})"
+print_step "Auth: $(auth_mode)   PQS: ${PQS_ENABLED}"
+if [ "$WANT_AUTH" = "1" ] && [ "$APP_USER_PROFILE" = "off" ]; then
+  print_warning "Auth is on but app-user is off — add '--with app-user' to test user-side OAuth flows."
+fi
 
 if ! docker info &>/dev/null; then
   print_error "Docker is not running. Start Docker Desktop and try again."
@@ -48,8 +62,10 @@ if [ "$DOCKER_MEMORY_GB" -lt 7 ]; then
   [ "$confirm_lower" = "y" ] || { echo "Aborted."; exit 1; }
 fi
 
+REQUIRED_HOSTS=(wallet.localhost scan.localhost sv.localhost)
+[ "$WANT_AUTH" = "1" ] && REQUIRED_HOSTS+=(keycloak.localhost)
 MISSING_HOSTS=()
-for domain in wallet.localhost scan.localhost sv.localhost; do
+for domain in "${REQUIRED_HOSTS[@]}"; do
   grep -q "$domain" /etc/hosts 2>/dev/null || MISSING_HOSTS+=("$domain")
 done
 
@@ -58,12 +74,12 @@ if [ ${#MISSING_HOSTS[@]} -gt 0 ]; then
   print_warning "  ${MISSING_HOSTS[*]}"
   echo ""
   echo "  Fix (requires sudo):"
-  echo "    echo '127.0.0.1  wallet.localhost scan.localhost sv.localhost' | sudo tee -a /etc/hosts"
+  echo "    echo '127.0.0.1  ${MISSING_HOSTS[*]}' | sudo tee -a /etc/hosts"
   echo ""
   read -rp "  Fix it automatically now? [y/N] " fix_hosts
   fix_hosts_lower="$(echo "$fix_hosts" | tr '[:upper:]' '[:lower:]')"
   if [ "$fix_hosts_lower" = "y" ]; then
-    echo "127.0.0.1  wallet.localhost scan.localhost sv.localhost" | sudo tee -a /etc/hosts > /dev/null
+    echo "127.0.0.1  ${MISSING_HOSTS[*]}" | sudo tee -a /etc/hosts > /dev/null
     print_ok "Added to /etc/hosts."
     if grep -qi "microsoft" /proc/version 2>/dev/null; then
       print_warning "WSL detected: /etc/hosts may reset on reboot. If domains stop resolving, re run canton builder start."
@@ -71,48 +87,9 @@ if [ ${#MISSING_HOSTS[@]} -gt 0 ]; then
   fi
 fi
 
-BUNDLE_EXTRACT_DIR="${BUNDLE_DIR:-$HOME/.canton-builder/bundle}"
-LOCALNET_COMPOSE="$BUNDLE_EXTRACT_DIR/splice-node/docker-compose/localnet/compose.yaml"
-if [ ! -f "$LOCALNET_COMPOSE" ]; then
-  print_step "Downloading Splice LocalNet bundle v${IMAGE_TAG}..."
-  echo "  This is a one-time download (~500MB). It will be cached for future runs."
-  echo ""
-  mkdir -p "$BUNDLE_EXTRACT_DIR"
-  TARBALL_URLS=(
-    "https://github.com/digital-asset/decentralized-canton-sync/releases/download/v${IMAGE_TAG}/${IMAGE_TAG}_splice-node.tar.gz"
-  )
-  TARBALL_PATH="$BUNDLE_EXTRACT_DIR/${IMAGE_TAG}_splice-node.tar.gz"
-  DOWNLOADED=0
-  for TARBALL_URL in "${TARBALL_URLS[@]}"; do
-    echo "  Trying: $TARBALL_URL"
-    curl -fsSL --location --progress-bar "$TARBALL_URL" -o "$TARBALL_PATH" 2>/dev/null && {
-      if [ -s "$TARBALL_PATH" ] && (file "$TARBALL_PATH" 2>/dev/null | grep -q "gzip\|tar\|compressed" || python3 -c "import sys; d=open('$TARBALL_PATH','rb').read(2); sys.exit(0 if d==b'\x1f\x8b' else 1)" 2>/dev/null); then
-        DOWNLOADED=1
-        break
-      else
-        print_warning "Downloaded file is not a valid tarball trying next URL..."
-        rm -f "$TARBALL_PATH"
-      fi
-    }
-  done
-  if [ $DOWNLOADED -eq 0 ]; then
-    print_error "Could not download the Splice LocalNet bundle."
-    echo ""
-    echo "  Download it manually from:"
-    echo "    https://github.com/digital-asset/decentralized-canton-sync/releases/tag/v${IMAGE_TAG}"
-    echo ""
-    echo "  Then place the file at:"
-    echo "    $TARBALL_PATH"
-    echo ""
-    echo "  And re-run: canton builder start"
-    exit 1
-  fi
-  print_step "Extracting bundle..."
-  tar -xzf "$TARBALL_PATH" -C "$BUNDLE_EXTRACT_DIR"
-  rm -f "$TARBALL_PATH"
-  print_ok "Bundle ready at $BUNDLE_EXTRACT_DIR"
-else
-  print_ok "Bundle already downloaded (v${IMAGE_TAG})"
+ensure_modules || exit 1
+if [ -n "${CUSTOMS:-}" ]; then
+  ensure_splice_bundle || exit 1
 fi
 
 print_step "Pulling Canton Network images (first run: ~3-5 min, then cached)..."
@@ -175,6 +152,18 @@ if [ -n "${CUSTOMS:-}" ]; then
     wait_for_validator "$n" $((pb + 3)) || FAILED=1
   done
 fi
+
+if [ "$WANT_AUTH" = "1" ]; then
+  printf "  %-20s" "Keycloak"
+  kc_ok=0
+  for _ in $(seq 1 30); do
+    if curl -fs "http://keycloak.localhost:8082/realms/AppProvider/.well-known/openid-configuration" &>/dev/null; then
+      print_ok "ready"; kc_ok=1; break
+    fi
+    printf "."; sleep 5
+  done
+  [ "$kc_ok" = "1" ] || { echo ""; print_warning "Keycloak not ready yet — it may need another minute."; }
+fi
 echo ""
 
 if [ $FAILED -eq 1 ]; then
@@ -202,7 +191,18 @@ echo "  JSON Ledger API:"
 [ "$APP_PROVIDER_PROFILE" = "on" ] && echo "    App Provider →  http://localhost:3975"
 [ "$APP_USER_PROFILE" = "on" ]     && echo "    App User     →  http://localhost:2975"
 echo ""
-echo "  Deploy your DAR:  canton builder deploy ./your-project.dar"
-echo "  Check status:     canton builder status"
-echo "  Stop:             canton builder stop"
+if [ "$WANT_AUTH" = "1" ]; then
+  echo "  Auth: OAuth2 (Keycloak)"
+  echo "    Token endpoint →  http://keycloak.localhost:8082/realms/{AppProvider,AppUser}/protocol/openid-connect/token"
+  echo "    Admin console  →  http://keycloak.localhost:8082  (admin / admin)"
+  echo "    Realms: AppProvider, AppUser   Grant: client_credentials"
+else
+  echo "  Auth: self-signed HS256 (secret: $(auth_selfsigned_secret), audience: ${AUTH_AUDIENCE})"
+fi
+echo ""
+echo "  Credentials & parties:  canton builder env"
+echo "  Get a token:            canton builder token [--validator app-provider|app-user|sv]"
+echo "  Deploy your DAR:        canton builder deploy ./your-project.dar"
+echo "  Check status:           canton builder status"
+echo "  Stop:                   canton builder stop"
 echo ""

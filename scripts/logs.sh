@@ -25,6 +25,6 @@ else
     print_step "Tailing all infra logs (Ctrl+C to stop)"
     echo "  Tip: --validator <name>  to tail a custom validator's logs."
   fi
-  mapfile -t argv < <(infra_compose_argv)
+  mapfile -t argv < <(infra_compose_argv --all)
   exec "${argv[@]}" logs -f --tail=50 ${SERVICE:+"$SERVICE"}
 fi

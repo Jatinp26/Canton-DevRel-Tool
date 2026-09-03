@@ -6,8 +6,6 @@ source "$DEVREL_DIR/scripts/lib/registry.sh"
 source "$DEVREL_DIR/scripts/lib/compose.sh"
 
 print_header "Canton Builder Tool Stopping LocalNet"
-
-# Registry running flags are NOT cleared on stop — they encode "what to start next time".
 for n in $(registry_read | jq -r '.validators[] | select(.type=="custom") | .name'); do
   print_step "Stopping custom validator '$n'…"
   mapfile -t argv < <(custom_compose_argv "$n")
@@ -15,7 +13,7 @@ for n in $(registry_read | jq -r '.validators[] | select(.type=="custom") | .nam
 done
 
 print_step "Stopping localnet (data volumes preserved)…"
-mapfile -t argv < <(infra_compose_argv)
+mapfile -t argv < <(infra_compose_argv --all)
 "${argv[@]}" down
 
 echo ""

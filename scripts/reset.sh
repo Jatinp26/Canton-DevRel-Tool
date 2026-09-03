@@ -35,7 +35,7 @@ for n in $(registry_read | jq -r '.validators[] | select(.type=="custom") | .nam
 done
 
 print_step "Tearing down localnet…"
-mapfile -t argv < <(infra_compose_argv)
+mapfile -t argv < <(infra_compose_argv --all)
 "${argv[@]}" down -v 2>/dev/null || true
 
 if [ "$PURGE" -eq 1 ]; then
@@ -45,6 +45,8 @@ if [ "$PURGE" -eq 1 ]; then
   rm -rf "$CANTON_DEVREL_DIR/nginx-customs"
   rm -f  "$CANTON_DEVREL_DIR/validators.json"
   rm -f  "$CANTON_DEVREL_DIR/.registry.lock"
+  rm -f  "$CANTON_DEVREL_DIR/.mode"
+  rm -rf "$CANTON_DEVREL_DIR/modules"
 fi
 
 echo ""
